@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estúdio Privado — Aeris</title>
+    <!-- Google Fonts Independentes -->
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Inter:wght@200;300;400;500&display=swap" rel="stylesheet">
+    <!-- Arquivo de estilos global do seu site -->
+    <link rel="stylesheet" href="/perfil/perfil.css">
+    <!-- Arquivo de estilos focado no design de luxo do perfil -->
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+    <!-- Header Fixo Editorial -->
+    <header id="dynamic-header" class="scrolled">
+        <div class="container nav-container">
+             <a href="#" class="logo-wrap">
+                <div class="logo-image-container">
+                    <img src="https://i.postimg.cc/4mgSP8GJ/Chat-GPT-Image-26-de-mai-de-2026-23-23-15.png" alt="AERIS" class="logo-png">
+                </div>
+                <div class="logo-text">AERIS</div>
+            </a>
+            <ul class="nav-menu">
+                <li><a href="/index.html" class="nav-link">Início</a></li>
+                <li><a href="#" class="profile-menu-item btn-logout" style="margin:0;">Sair do Estúdio</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- Área Logada do Cliente -->
+    <main class="container">
+        <section class="profile-layout">
+            
+            <!-- Painel Lateral -->
+            <aside class="profile-sidebar">
+                <div class="welcome-box">
+                    <h2 id="user-display-name">Carregando...</h2>
+                    <span id="user-display-cpf">CPF: ...</span>
+                </div>
+                <nav class="profile-menu">
+                    <div class="profile-menu-item active" data-tab="tab-pedido">Pedido Atual</div>
+                    <div class="profile-menu-item" data-tab="tab-historico">Histórico de Pedidos</div>
+                    <div class="profile-menu-item" data-tab="tab-catalogo">Acervo & Catálogos</div>
+                    <div class="profile-menu-item" data-tab="tab-dados">Dados da Conta</div>
+                </nav>
+            </aside>
+
+            <!-- Telas de Transição Dinâmica -->
+            <section class="profile-content">
+                
+                <!-- ABA: PEDIDO ATUAL -->
+                <div id="tab-pedido" class="profile-tab-content active">
+                    <div class="editorial-header">
+                        <span class="tag">Status Operacional</span>
+                        <h2>Acompanhamento Técnico</h2>
+                    </div>
+                    
+                    <div id="active-order-container">
+                        <p class="project-section-description">Buscando informações do seu projeto ativo...</p>
+                    </div>
+                </div>
+
+                <!-- ABA: HISTÓRICO DE PEDIDOS -->
+                <div id="tab-historico" class="profile-tab-content">
+                    <div class="editorial-header">
+                        <span class="tag">Arquivos Restritos</span>
+                        <h2>Pedidos Concluídos</h2>
+                    </div>
+                    <p class="project-section-description">Relação completa de suas solicitações e projetos finalizados na Aeris.</p>
+                    
+                    <table class="editorial-table">
+                        <thead>
+                            <tr>
+                                <th>ID do Pedido</th>
+                                <th>Data de Conclusão</th>
+                                <th>Especificação</th>
+                                <th>Documentos</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-table-body">
+                            <tr>
+                                <td colspan="4" style="color: rgba(44,34,30,0.4); text-align: center; padding: 40px 0;">
+                                    Nenhum pedido finalizado encontrado.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- ABA: ACERVO & CATÁLOGOS -->
+                <div id="tab-catalogo" class="profile-tab-content">
+                    <div class="editorial-header">
+                        <span class="tag">Aeris Atualidade</span>
+                        <h2>Coleções Privadas</h2>
+                    </div>
+                    <p class="project-section-description">Acesso exclusivo ao catálogo técnico de paletas arquitetônicas e acabamentos de alta performance.</p>
+                    
+                    <div class="catalog-premium-grid">
+                        <div class="catalog-item-card">
+                            <span class="catalog-meta">Coleção Primavera/Verão 2026</span>
+                            <h3 style="font-family: var(--font-serif); font-weight:300; margin: 15px 0 10px 0; font-size: 22px;">Paletas Minerais & Atmosféricas</h3>
+                            <p style="font-size: 13px; color:rgba(18,16,15,0.6); margin-bottom: 30px; line-height: 1.6;">Especificação técnica completa voltada para grandes estúdios e arquitetos parceiros.</p>
+                            <a href="#" class="btn-luxury dark" style="padding: 12px 24px; font-size: 9px; display: inline-block;">Acessar PDF</a>
+                        </div>
+                        <div class="catalog-item-card">
+                            <span class="catalog-meta">Manual Técnico v4</span>
+                            <h3 style="font-family: var(--font-serif); font-weight:300; margin: 15px 0 10px 0; font-size: 22px;">Superfícies de Alta Resiliência</h3>
+                            <p style="font-size: 13px; color:rgba(18,16,15,0.6); margin-bottom: 30px; line-height: 1.6;">Diretrizes de aplicação de insumos e processos de cura industrial controlada.</p>
+                            <a href="#" class="btn-luxury dark" style="padding: 12px 24px; font-size: 9px; display: inline-block;">Acessar PDF</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ABA: DADOS DA CONTA -->
+                <div id="tab-dados" class="profile-tab-content">
+                    <div class="editorial-header">
+                        <span class="tag">Credenciais Privadas</span>
+                        <h2>Modificar Cadastro</h2>
+                    </div>
+                    
+                    <form id="update-profile-form" class="auth-form active" style="max-width: 600px; display: flex; flex-direction: column; gap: 24px;">
+                        <div class="form-group">
+                            <label>Nome Completo (Inalterável)</label>
+                            <input type="text" id="update-name" disabled style="background-color: rgba(44,34,30,0.03); color: rgba(44,34,30,0.4); border-bottom-color: transparent; padding-left: 10px;">
+                        </div>
+                        <div class="form-group">
+                            <label>E-mail Institucional (Inalterável)</label>
+                            <input type="email" id="update-email" disabled style="background-color: rgba(44,34,30,0.03); color: rgba(44,34,30,0.4); border-bottom-color: transparent; padding-left: 10px;">
+                        </div>
+                        <div class="form-group">
+                            <label>Telefone / Contato</label>
+                            <input type="text" id="update-phone" required placeholder="(00) 00000-0000">
+                        </div>
+                        <div class="form-group">
+                            <label>CEP</label>
+                            <input type="text" id="update-cep" required placeholder="00000-000">
+                        </div>
+                        <div class="form-group">
+                            <label>Logradouro</label>
+                            <input type="text" id="update-logradouro" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Número</label>
+                            <input type="text" id="update-number" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Bairro</label>
+                            <input type="text" id="update-bairro" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Cidade</label>
+                            <input type="text" id="update-cidade" required>
+                        </div>
+                        <div class="form-group">
+                            <label>UF</label>
+                            <input type="text" id="update-uf" required maxlength="2">
+                        </div>
+
+                        <button type="submit" class="btn-luxury dark auth-submit-btn" style="margin-top: 20px; width: 100%; text-align: center;">Salvar Alterações</button>
+                    </form>
+
+                    <div class="danger-zone">
+                        <h3 style="font-family: var(--font-serif); font-size: 22px; color: #9A4444; font-weight:300; margin-bottom: 10px;">Exclusão de Conta</h3>
+                        <p style="font-size: 13px; color: rgba(18,16,15,0.6); margin-bottom: 25px; line-height: 1.7;">Ao encerrar seu acesso, todo o seu histórico de pedidos, acessos a catálogos exclusivos e chaves serão permanentemente revogados do ecossistema Aeris.</p>
+                        <button id="btn-start-delete" class="btn-luxury" style="color: #9A4444; border-color: rgba(154, 68, 68, 0.3); width: fit-content;">Revogar Chave de Membro</button>
+                    </div>
+                </div>
+
+            </section>
+        </section>
+    </main>
+
+    <!-- Modal de Confirmação Crítica (Exclusão) -->
+    <div id="delete-confirm-modal" class="modal-overlay">
+        <div class="modal-card">
+            <button class="modal-close" id="close-delete-modal">&times;</button>
+            <div class="auth-header">
+                <div style="width: 8px; height: 8px; background-color: #9A4444; border-radius: 50%; margin: 0 auto 15px auto;"></div>
+                <h2 class="auth-title">Ação Irreversível</h2>
+                <p class="auth-subtitle" id="delete-modal-step-text">Você tem certeza que deseja deletar sua conta? Esta ação não poderá ser desfeita.</p>
+            </div>
+
+            <!-- Passo 1 -->
+            <div id="delete-step-1" class="auth-form active">
+                <button id="btn-confirm-delete-step1" class="btn-luxury" style="width: 100%; background-color: #9A4444; color: #fff; border-color: #9A4444; text-align: center;">Sim, desejo prosseguir</button>
+            </div>
+
+            <!-- Passo 2 -->
+            <form id="delete-step-2" class="auth-form" style="display: none; flex-direction: column; gap: 20px;">
+                <div class="form-group">
+                    <label>Confirme sua senha de acesso</label>
+                    <input type="password" id="delete-password-confirm" required placeholder="********">
+                </div>
+                <div class="form-feedback error" id="delete-modal-feedback" style="font-size: 12px; margin-top: 5px; color: #9A4444;"></div>
+                <button type="submit" class="btn-luxury" style="width: 100%; background-color: #12100F; color: #fff; text-align: center;">Confirmar Exclusão Definitiva</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Container de Notificações Pop-up -->
+    <div class="toast-container" id="global-toast-container"></div>
+
+    <!-- Módulo JS Principal -->
+    <script type="module" src="/perfil/perfil.js"></script>
+</body>
+</html>

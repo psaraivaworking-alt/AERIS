@@ -1,0 +1,344 @@
+/* ==========================================================================
+   PAINEL PRIVADO (PERFIL) — DESIGN PATTERN EDITORIAL AERIS
+   ========================================================================== */
+
+/* Layout Estrutural Assimétrico */
+.profile-layout {
+    padding-top: 180px;
+    padding-bottom: 140px;
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 100px;
+    align-items: flex-start;
+}
+
+/* Sidebar Estilo Galeria Fina */
+.profile-sidebar {
+    position: sticky;
+    top: 140px;
+    border-right: 1px solid rgba(44, 34, 30, 0.06);
+    padding-right: 60px;
+}
+
+.welcome-box {
+    margin-bottom: 60px;
+}
+
+.welcome-box h2 {
+    font-family: var(--font-serif);
+    font-size: 32px;
+    color: var(--color-deep);
+    font-weight: 300;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+}
+
+.welcome-box span {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: var(--color-moss);
+    display: block;
+    margin-top: 8px;
+    font-weight: 500;
+}
+
+/* Menu de Navegação Premium */
+.profile-menu {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.profile-menu-item {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: rgba(18, 16, 15, 0.4);
+    text-decoration: none;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    padding: 6px 0;
+    border-bottom: 1px solid transparent;
+    width: fit-content;
+}
+
+.profile-menu-item.active, 
+.profile-menu-item:hover {
+    color: var(--color-dark);
+    border-bottom-color: var(--color-deep);
+    padding-left: 6px;
+}
+
+.profile-menu-item.btn-logout {
+    margin-top: 60px;
+    color: #9A4444;
+    border-bottom-color: transparent !important;
+}
+
+.profile-menu-item.btn-logout:hover {
+    color: #c95a5a;
+    padding-left: 0;
+}
+
+/* Transições Fluídas entre Abas */
+.profile-tab-content {
+    display: none;
+    opacity: 0;
+    transform: translateY(15px);
+    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.profile-tab-content.active {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Pipeline Industrial de Rastreamento (Acompanhamento) */
+.order-tracking-card {
+    background-color: var(--color-sand);
+    padding: 50px;
+    border: 1px solid rgba(44, 34, 30, 0.03);
+    margin-bottom: 40px;
+    box-shadow: 0 30px 70px rgba(44, 34, 30, 0.02);
+}
+
+.order-info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 1px solid rgba(44, 34, 30, 0.08);
+    padding-bottom: 25px;
+    margin-bottom: 45px;
+}
+
+.timeline {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    position: relative;
+    margin-top: 50px;
+    padding-bottom: 10px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    top: 15px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background-color: rgba(44, 34, 30, 0.08);
+    z-index: 1;
+}
+
+.timeline-step {
+    text-align: center;
+    position: relative;
+    z-index: 2;
+}
+
+.timeline-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-mineral);
+    margin: 0 auto 20px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--color-mineral);
+    transition: var(--transition-fast);
+}
+
+/* Variação Semafórica Fina do Rastreamento */
+.timeline-step.active .timeline-dot {
+    background-color: var(--color-deep);
+    color: #fff;
+    border-color: var(--color-deep);
+    box-shadow: 0 0 0 6px rgba(42, 33, 29, 0.08);
+}
+
+.timeline-step.completed .timeline-dot {
+    background-color: var(--color-moss);
+    color: #fff;
+    border-color: var(--color-moss);
+}
+
+.timeline-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 400;
+    color: rgba(44, 34, 30, 0.4);
+    transition: var(--transition-fast);
+}
+
+.timeline-step.active .timeline-label {
+    color: var(--color-dark);
+    font-weight: 500;
+}
+
+.timeline-date {
+    font-size: 10px;
+    font-family: var(--font-sans);
+    color: var(--color-moss);
+    display: block;
+    margin-top: 6px;
+    opacity: 0.8;
+}
+
+/* Tabelas Editoriais */
+.editorial-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 40px;
+}
+
+.editorial-table th {
+    text-align: left;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    padding: 20px 15px;
+    border-bottom: 1px solid var(--color-deep);
+    color: var(--color-deep);
+    font-weight: 500;
+}
+
+.editorial-table td {
+    padding: 25px 15px;
+    border-bottom: 1px solid rgba(44, 34, 30, 0.05);
+    font-size: 13px;
+    color: rgba(18, 16, 15, 0.75);
+    font-weight: 300;
+    transition: var(--transition-fast);
+}
+
+.editorial-table tr:hover td {
+    background-color: rgba(243, 239, 233, 0.4);
+    color: var(--color-dark);
+}
+
+/* Grid de Catálogos Privados */
+.catalog-premium-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 40px;
+    margin-top: 50px;
+}
+
+.catalog-item-card {
+    background: #fff;
+    border: 1px solid rgba(44, 34, 30, 0.04);
+    padding: 45px;
+    box-shadow: 0 20px 50px rgba(18, 16, 15, 0.02);
+    transition: var(--transition-fast);
+}
+
+.catalog-item-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 40px 80px rgba(44, 34, 30, 0.06);
+    border-color: rgba(44, 34, 30, 0.1);
+}
+
+.catalog-meta {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: var(--color-moss);
+    font-weight: 500;
+}
+
+/* Área Crítica / Danger Zone */
+.danger-zone {
+    margin-top: 80px;
+    border-top: 1px dashed rgba(154, 68, 68, 0.25);
+    padding-top: 50px;
+}
+
+#tab-dados ::selection {
+    background: rgba(42, 33, 29, 0.08);
+    color: var(--color-dark);
+}
+
+/* ==========================================================================
+   ADAPTAÇÕES DE RESPONSIVIDADE (UX MÓVEL)
+   ========================================================================== */
+@media (max-width: 992px) {
+    .profile-layout {
+        grid-template-columns: 1fr;
+        gap: 50px;
+        padding-top: 140px;
+    }
+
+    .profile-sidebar {
+        position: relative;
+        top: 0;
+        border-right: none;
+        border-bottom: 1px solid rgba(44, 34, 30, 0.06);
+        padding-right: 0;
+        padding-bottom: 40px;
+    }
+
+    .welcome-box {
+        margin-bottom: 30px;
+    }
+
+    .profile-menu {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 15px 30px;
+    }
+
+    /* Giro Dinâmico do Pipeline para Vertical */
+    .timeline {
+        grid-template-columns: 1fr;
+        gap: 35px;
+        text-align: left;
+        padding-left: 10px;
+    }
+
+    .timeline::before {
+        width: 1px;
+        height: 100%;
+        top: 0;
+        left: 16px;
+    }
+
+    .timeline-step {
+        display: flex;
+        align-items: center;
+        gap: 25px;
+        text-align: left;
+    }
+
+    .timeline-dot {
+        margin: 0;
+        width: 34px;
+        height: 34px;
+    }
+}
+
+
+
+@media (max-width: 768px) {
+    .catalog-premium-grid {
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
+
+    .order-tracking-card {
+        padding: 30px 20px;
+    }
+
+    .order-info-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+    }
+}
