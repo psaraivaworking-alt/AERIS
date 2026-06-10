@@ -211,25 +211,37 @@ header.scrolled .profile-btn:hover {
     display: none;
     flex-direction: column;
     justify-content: space-between;
-    width: 24px;
-    height: 14px;
-    background: none;
+    width: 26px;
+    height: 12px;
+    background: transparent;
     border: none;
     cursor: pointer;
-    z-index: 12121100;
     padding: 0;
+    position: relative;
+    z-index: 1100;
 }
 
 .menu-hamburger .bar {
     width: 100%;
-    height: 1px;
-    background-color: #fff;
-    transition: var(--transition-fast);
-    transform-origin: center;
+    height: 2px;
+    background: #fff;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    display: block;
 }
 
 header.scrolled .menu-hamburger .bar {
     background-color: var(--color-deep);
+}
+
+/* Modificadores para transformar o hambúrguer em X */
+.menu-hamburger.open .bar:nth-child(1) {
+    transform: translateY(5px) rotate(45deg);
+    background-color: #fff !important;
+}
+
+.menu-hamburger.open .bar:nth-child(2) {
+    transform: translateY(-5px) rotate(-45deg);
+    background-color: #fff !important;
 }
 
 /* --- Hero Theater --- */
@@ -642,7 +654,7 @@ footer { background-color: var(--color-dark); color: var(--color-sand); padding:
 
 .auth-switch-text a { 
     color: var(--color-deep, #1a120f); 
-    text-weight: 600;
+    font-weight: 600;
     text-decoration: none; 
     border-bottom: 1px solid rgba(44, 34, 30, 0.4); 
     padding-bottom: 1px; 
@@ -655,50 +667,25 @@ footer { background-color: var(--color-dark); color: var(--color-sand); padding:
 
 @media (max-width: 992px) {
     /* --- Ajuste de Respiros Globais --- */
-    .nav-container {
+    .container {
         padding: 0 max(20px, 6vw);
     }
     
     header { 
         padding: 20px 0; 
     }
+    
     header.scrolled { 
         padding: 14px 0; 
     }
 
-    /* --- Menu Hamburguer Elegante & Funcional (Calibrado) --- */
-    .menu-hamburger { 
-        display: flex; 
-        flex-direction: column;
-        justify-content: space-between; /* Mantém as barras separadas na altura exata */
-        width: 26px;
-        height: 12px; /* Altura controlada para evitar desvio no rotate */
-        background: none;
-        border: none;
-        cursor: pointer;
-        z-index: 1100;
-        padding: 0;
-    }
-    
-    .menu-hamburger .bar {
-        width: 100%;
-        height: 1px;
-        background-color: #fff; 
-        transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.3s ease;
+    .nav-container {
+        padding: 0 max(20px, 6vw);
     }
 
-    header.scrolled .menu-hamburger .bar {
-        background-color: var(--color-deep);
-    }
-
-    /* Transição cirúrgica para o formato de "X" usando 2 barras */
-    .menu-hamburger.open .bar:nth-child(1) { 
-        transform: translateY(5.5px) rotate(45deg); 
-        background-color: var(--color-sand) !important; 
-    }
-    .menu-hamburger.open .bar:nth-child(2) { 
-        transform: translateY(-5.5px) rotate(-45deg); 
-        background-color: var(--color-sand) !important; 
+    /* --- Menu Hamburguer Ativado no Mobile --- */
+    .menu-hamburger {
+        display: flex;
     }
 
     /* --- Gaveta de Menu Mobile Premium Fullscreen --- */
@@ -733,7 +720,7 @@ footer { background-color: var(--color-dark); color: var(--color-sand); padding:
     
     .nav-menu a { 
         font-size: 14px; 
-        color: var(--color-sand); 
+        color: #fff; 
         letter-spacing: 4px;
         display: block;
         padding: 8px 0;
