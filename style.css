@@ -216,7 +216,7 @@ header.scrolled .profile-btn:hover {
     background: none;
     border: none;
     cursor: pointer;
-    z-index: 1100;
+    z-index: 12121100;
     padding: 0;
 }
 
