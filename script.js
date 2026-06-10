@@ -48,45 +48,53 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ==========================================================================
-    // 3. MENU HAMBÚRGUER MOBILE (CORRIGIDO E OTIMIZADO)
-    // ==========================================================================
-    const hamburgerBtn = document.getElementById('hamburger-btn');
-    const navWrapper = document.getElementById('nav-wrapper'); // Captura precisa via ID
-    const navLinks = document.querySelectorAll('.nav-link');
 
-    if (hamburgerBtn && navWrapper) {
-        function toggleMenu(e) {
-            if (e) e.stopPropagation(); // Previne propagação indesejada no documento
-            hamburgerBtn.classList.toggle('open');
-            navWrapper.classList.toggle('open');
+// ==========================================================================
+// 3. MENU HAMBÚRGUER MOBILE
+// ==========================================================================
+const hamburgerBtn = document.getElementById('hamburger-btn');
+const navWrapper = document.getElementById('nav-wrapper');
+const navLinks = document.querySelectorAll('.nav-link');
+
+if (hamburgerBtn && navWrapper) {
+
+    const openMenu = () => {
+        hamburgerBtn.classList.add('open');
+        navWrapper.classList.add('open');
+    };
+
+    const closeMenu = () => {
+        hamburgerBtn.classList.remove('open');
+        navWrapper.classList.remove('open');
+    };
+
+    const toggleMenu = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        hamburgerBtn.classList.toggle('open');
+        navWrapper.classList.toggle('open');
+    };
+
+    hamburgerBtn.addEventListener('click', toggleMenu);
+    hamburgerBtn.addEventListener('touchstart', toggleMenu);
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', closeMenu);
+    });
+
+    document.addEventListener('click', (e) => {
+        if (
+            navWrapper.classList.contains('open') &&
+            !navWrapper.contains(e.target) &&
+            !hamburgerBtn.contains(e.target)
+        ) {
+            closeMenu();
         }
+    });
+}
 
-        function forceCloseMenu() {
-            hamburgerBtn.classList.remove('open');
-            navWrapper.classList.remove('open');
-        }
-
-        // Evento de clique para abrir/fechar
-        hamburgerBtn.addEventListener('click', toggleMenu);
-
-        // Fecha a gaveta automaticamente ao clicar em qualquer link interno
-        navLinks.forEach(link => {
-            link.addEventListener('click', () => {
-                if (navWrapper.classList.contains('open')) forceCloseMenu();
-            });
-        });
-
-        // Fecha o menu se o usuário clicar em qualquer área vazia fora dele
-        document.addEventListener('click', (e) => {
-            const isClickInsideMenu = navWrapper.contains(e.target);
-            const isClickOnHamburger = hamburgerBtn.contains(e.target);
-            
-            if (navWrapper.classList.contains('open') && !isClickInsideMenu && !isClickOnHamburger) {
-                forceCloseMenu();
-            }
-        });
-    }
+    
 
     // ==========================================================================
     // 4. SISTEMA CLEAN DE JANELA MODAL (AUTH)
