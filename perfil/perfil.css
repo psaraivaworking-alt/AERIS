@@ -1,344 +1,377 @@
 /* ==========================================================================
-   PAINEL PRIVADO (PERFIL) — DESIGN PATTERN EDITORIAL AERIS
+   PÁGINA DE PROJETOS - ESTILOS ESPECÍFICOS (AERIS DESIGN SYSTEM)
    ========================================================================== */
 
-/* Layout Estrutural Assimétrico */
-.profile-layout {
-    padding-top: 180px;
-    padding-bottom: 140px;
-    display: grid;
-    grid-template-columns: 320px 1fr;
-    gap: 100px;
-    align-items: flex-start;
-}
-
-/* Sidebar Estilo Galeria Fina */
-.profile-sidebar {
-    position: sticky;
-    top: 140px;
-    border-right: 1px solid rgba(44, 34, 30, 0.06);
-    padding-right: 60px;
-}
-
-.welcome-box {
-    margin-bottom: 60px;
-}
-
-.welcome-box h2 {
-    font-family: var(--font-serif);
-    font-size: 32px;
-    color: var(--color-deep);
-    font-weight: 300;
-    line-height: 1.2;
-    letter-spacing: -0.5px;
-}
-
-.welcome-box span {
-    font-size: 9px;
-    text-transform: uppercase;
-    letter-spacing: 3px;
-    color: var(--color-moss);
-    display: block;
-    margin-top: 8px;
-    font-weight: 500;
-}
-
-/* Menu de Navegação Premium */
-.profile-menu {
-    list-style: none;
+/* Hero Section */
+.projects-hero {
+    position: relative;
+    width: 100%;
+    min-height: 85vh;
     display: flex;
-    flex-direction: column;
-    gap: 24px;
+    align-items: center;
+    padding: 120px 4% 80px 4%;
+    background-color: #F9F8F6; /* Fundo off-white sofisticado */
+    overflow: hidden;
 }
 
-.profile-menu-item {
+.hero-image-wrapper {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 50%;
+    height: 100%;
+}
+
+.hero-bg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(20%) brightness(90%);
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, #F9F8F6 10%, rgba(249, 248, 246, 0.4) 100%);
+}
+
+.hero-content-container {
+    position: relative;
+    z-index: 2;
+    width: 55%;
+    max-width: 800px;
+}
+
+.hero-tag {
+    display: inline-block;
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 3px;
-    color: rgba(18, 16, 15, 0.4);
-    text-decoration: none;
-    cursor: pointer;
-    transition: var(--transition-fast);
-    padding: 6px 0;
-    border-bottom: 1px solid transparent;
-    width: fit-content;
+    color: var(--color-moss, #4A5D4E);
+    margin-bottom: 20px;
+    font-weight: 600;
 }
 
-.profile-menu-item.active, 
-.profile-menu-item:hover {
-    color: var(--color-dark);
-    border-bottom-color: var(--color-deep);
-    padding-left: 6px;
-}
-
-.profile-menu-item.btn-logout {
-    margin-top: 60px;
-    color: #9A4444;
-    border-bottom-color: transparent !important;
-}
-
-.profile-menu-item.btn-logout:hover {
-    color: #c95a5a;
-    padding-left: 0;
-}
-
-/* Transições Fluídas entre Abas */
-.profile-tab-content {
-    display: none;
-    opacity: 0;
-    transform: translateY(15px);
-    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.profile-tab-content.active {
-    display: block;
-    opacity: 1;
-    transform: translateY(0);
-}
-
-/* Pipeline Industrial de Rastreamento (Acompanhamento) */
-.order-tracking-card {
-    background-color: var(--color-sand);
-    padding: 50px;
-    border: 1px solid rgba(44, 34, 30, 0.03);
+.hero-title {
+    font-family: var(--font-serif, "Playfair Display", Georgia, serif);
+    font-size: 48px;
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--color-deep, #2C221E);
     margin-bottom: 40px;
-    box-shadow: 0 30px 70px rgba(44, 34, 30, 0.02);
 }
 
-.order-info-header {
+.hero-institutional-text h3 {
+    font-family: var(--font-serif, "Playfair Display", serif);
+    font-size: 22px;
+    font-weight: 400;
+    margin-bottom: 15px;
+    color: var(--color-deep, #2C221E);
+}
+
+.hero-institutional-text p {
+    font-size: 15px;
+    line-height: 1.7;
+    color: rgba(44, 34, 30, 0.8);
+    margin-bottom: 15px;
+}
+
+/* Seção do Portfolio */
+.projects-portfolio-section {
+    padding: 80px 4%;
+    background-color: #F9F8F6;
+}
+
+.section-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.portfolio-filters {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    border-bottom: 1px solid rgba(44, 34, 30, 0.08);
-    padding-bottom: 25px;
-    margin-bottom: 45px;
+    gap: 30px;
+    border-bottom: 1px solid rgba(44, 34, 30, 0.1);
+    padding-bottom: 20px;
+    margin-bottom: 30px;
 }
 
-.timeline {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
+.filter-btn {
+    background: none;
+    border: none;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: rgba(44, 34, 30, 0.5);
+    cursor: pointer;
+    padding: 5px 0;
+    transition: color 0.3s ease;
     position: relative;
-    margin-top: 50px;
-    padding-bottom: 10px;
 }
 
-.timeline::before {
+.filter-btn.active, .filter-btn:hover {
+    color: var(--color-deep, #2C221E);
+}
+
+.filter-btn.active::after {
     content: '';
     position: absolute;
-    top: 15px;
+    bottom: -21px;
     left: 0;
     width: 100%;
-    height: 1px;
-    background-color: rgba(44, 34, 30, 0.08);
-    z-index: 1;
+    height: 2px;
+    background-color: var(--color-moss, #4A5D4E);
 }
 
-.timeline-step {
-    text-align: center;
-    position: relative;
-    z-index: 2;
+.portfolio-disclaimer {
+    font-family: var(--font-serif, serif);
+    font-style: italic;
+    font-size: 18px;
+    color: var(--color-moss, #4A5D4E);
+    border-left: 2px solid var(--color-moss, #4A5D4E);
+    padding-left: 20px;
+    margin: 40px 0;
+    max-width: 700px;
+    line-height: 1.5;
 }
 
-.timeline-dot {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background-color: var(--color-bg);
-    border: 1px solid var(--color-mineral);
-    margin: 0 auto 20px auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    font-weight: 300;
-    color: var(--color-mineral);
-    transition: var(--transition-fast);
-}
-
-/* Variação Semafórica Fina do Rastreamento */
-.timeline-step.active .timeline-dot {
-    background-color: var(--color-deep);
-    color: #fff;
-    border-color: var(--color-deep);
-    box-shadow: 0 0 0 6px rgba(42, 33, 29, 0.08);
-}
-
-.timeline-step.completed .timeline-dot {
-    background-color: var(--color-moss);
-    color: #fff;
-    border-color: var(--color-moss);
-}
-
-.timeline-label {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    font-weight: 400;
-    color: rgba(44, 34, 30, 0.4);
-    transition: var(--transition-fast);
-}
-
-.timeline-step.active .timeline-label {
-    color: var(--color-dark);
-    font-weight: 500;
-}
-
-.timeline-date {
-    font-size: 10px;
-    font-family: var(--font-sans);
-    color: var(--color-moss);
+.portfolio-disclaimer span {
     display: block;
-    margin-top: 6px;
-    opacity: 0.8;
-}
-
-/* Tabelas Editoriais */
-.editorial-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 40px;
-}
-
-.editorial-table th {
-    text-align: left;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 3px;
-    padding: 20px 15px;
-    border-bottom: 1px solid var(--color-deep);
-    color: var(--color-deep);
-    font-weight: 500;
-}
-
-.editorial-table td {
-    padding: 25px 15px;
-    border-bottom: 1px solid rgba(44, 34, 30, 0.05);
+    font-family: var(--font-sans, sans-serif);
+    font-style: normal;
     font-size: 13px;
-    color: rgba(18, 16, 15, 0.75);
-    font-weight: 300;
-    transition: var(--transition-fast);
+    color: rgba(44, 34, 30, 0.6);
+    margin-top: 5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
-.editorial-table tr:hover td {
-    background-color: rgba(243, 239, 233, 0.4);
-    color: var(--color-dark);
-}
-
-/* Grid de Catálogos Privados */
-.catalog-premium-grid {
+/* Grid System */
+.projects-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 40px;
-    margin-top: 50px;
+    margin-top: 5px;
 }
 
-.catalog-item-card {
-    background: #fff;
-    border: 1px solid rgba(44, 34, 30, 0.04);
-    padding: 45px;
-    box-shadow: 0 20px 50px rgba(18, 16, 15, 0.02);
-    transition: var(--transition-fast);
+.project-card {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    background: #FFF;
+    padding: 20px;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.catalog-item-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 40px 80px rgba(44, 34, 30, 0.06);
-    border-color: rgba(44, 34, 30, 0.1);
+.project-card:hover {
+    transform: translateY(-5px);
 }
 
-.catalog-meta {
-    font-size: 9px;
+.card-thumb-wrapper {
+    position: relative;
+    width: 100%;
+    height: 480px;
+    overflow: hidden;
+    background-color: #ECEAE6;
+}
+
+.card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.project-card:hover .card-img {
+    transform: scale(1.04);
+}
+
+.card-hover-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(44, 34, 30, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.project-card:hover .card-hover-overlay {
+    opacity: 1;
+}
+
+.view-project-label {
+    color: #FFF;
+    font-size: 12px;
     text-transform: uppercase;
-    letter-spacing: 3px;
-    color: var(--color-moss);
-    font-weight: 500;
+    letter-spacing: 2px;
+    border-bottom: 1px solid #FFF;
+    padding-bottom: 4px;
 }
 
-/* Área Crítica / Danger Zone */
-.danger-zone {
-    margin-top: 80px;
-    border-top: 1px dashed rgba(154, 68, 68, 0.25);
-    padding-top: 50px;
+.card-meta {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
 }
 
-#tab-dados ::selection {
-    background: rgba(42, 33, 29, 0.08);
-    color: var(--color-dark);
+.project-name {
+    font-family: var(--font-serif, "Playfair Display", serif);
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--color-deep, #2C221E);
 }
 
-/* ==========================================================================
-   ADAPTAÇÕES DE RESPONSIVIDADE (UX MÓVEL)
-   ========================================================================== */
-@media (max-width: 992px) {
-    .profile-layout {
-        grid-template-columns: 1fr;
-        gap: 50px;
-        padding-top: 140px;
+.project-location-year {
+    text-align: right;
+}
+
+.project-location-year .city {
+    display: block;
+    font-size: 13px;
+    color: var(--color-deep, #2C221E);
+}
+
+.project-location-year .year {
+    display: block;
+    font-size: 11px;
+    color: rgba(44, 34, 30, 0.5);
+    margin-top: 2px;
+}
+
+/* Diferenciais */
+.projects-differentials {
+    padding: 80px 4%;
+    background-color: #F4F2EE; /* Sutil quebra de tom de off-white */
+}
+
+.differentials-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 30px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.differential-item {
+    padding: 20px 0;
+}
+
+.diff-num {
+    font-family: var(--font-serif, serif);
+    font-size: 14px;
+    color: var(--color-moss, #4A5D4E);
+    display: block;
+    margin-bottom: 15px;
+}
+
+.differential-item h5 {
+    font-family: var(--font-serif, serif);
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--color-deep, #2C221E);
+    margin-bottom: 10px;
+}
+
+.differential-item p {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: rgba(44, 34, 30, 0.7);
+}
+
+/* Call To Action (CTA) */
+.projects-cta-section {
+    padding: 100px 4%;
+    background-color: #F9F8F6;
+    text-align: center;
+}
+
+.cta-container {
+    max-width: 750px;
+    margin: 0 auto;
+}
+
+.cta-content h2 {
+    font-family: var(--font-serif, "Playfair Display", serif);
+    font-size: 36px;
+    font-weight: 400;
+    color: var(--color-deep, #2C221E);
+    margin-bottom: 25px;
+}
+
+.cta-content p {
+    font-size: 15px;
+    line-height: 1.8;
+    color: rgba(44, 34, 30, 0.8);
+    margin-bottom: 40px;
+}
+
+.btn-aeris-primary {
+    display: inline-block;
+    background-color: var(--color-deep, #2C221E);
+    color: #FFF;
+    text-decoration: none;
+    padding: 15px 45px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.btn-aeris-primary:hover {
+    background-color: var(--color-moss, #4A5D4E);
+    transform: scale(1.02);
+}
+
+/* Responsive Rules */
+@media (max-width: 1024px) {
+    .projects-hero {
+        flex-direction: column-reverse;
+        padding-top: 100px;
+        align-items: flex-start;
     }
-
-    .profile-sidebar {
+    .hero-image-wrapper {
         position: relative;
-        top: 0;
-        border-right: none;
-        border-bottom: 1px solid rgba(44, 34, 30, 0.06);
-        padding-right: 0;
-        padding-bottom: 40px;
+        width: 100%;
+        height: 400px;
+        margin-top: 40px;
     }
-
-    .welcome-box {
-        margin-bottom: 30px;
+    .hero-content-container {
+        width: 100%;
     }
-
-    .profile-menu {
-        flex-direction: row;
-        flex-wrap: wrap;
-        gap: 15px 30px;
+    .hero-overlay {
+        background: linear-gradient(to bottom, #F9F8F6 0%, rgba(249, 248, 246, 0) 40%);
     }
-
-    /* Giro Dinâmico do Pipeline para Vertical */
-    .timeline {
-        grid-template-columns: 1fr;
-        gap: 35px;
-        text-align: left;
-        padding-left: 10px;
-    }
-
-    .timeline::before {
-        width: 1px;
-        height: 100%;
-        top: 0;
-        left: 16px;
-    }
-
-    .timeline-step {
-        display: flex;
-        align-items: center;
-        gap: 25px;
-        text-align: left;
-    }
-
-    .timeline-dot {
-        margin: 0;
-        width: 34px;
-        height: 34px;
+    .differentials-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
-
-
 
 @media (max-width: 768px) {
-    .catalog-premium-grid {
+    .projects-grid {
         grid-template-columns: 1fr;
-        gap: 25px;
     }
-
-    .order-tracking-card {
-        padding: 30px 20px;
+    .card-thumb-wrapper {
+        height: 350px;
     }
-
-    .order-info-header {
-        flex-direction: column;
-        align-items: flex-start;
+    .hero-title {
+        font-size: 32px;
+    }
+    .portfolio-filters {
+        overflow-x: auto;
+        white-space: nowrap;
         gap: 20px;
+        padding-bottom: 10px;
+    }
+    .differentials-grid {
+        grid-template-columns: 1fr;
     }
 }

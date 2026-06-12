@@ -83,6 +83,8 @@ header {
     z-index: 1000;
     padding: 45px 100px;
     transition: var(--transition-fast);
+    background-color: rgba(44, 27, 2, 0.97);
+    
 }
 
 header.scrolled {
@@ -96,6 +98,7 @@ header.scrolled {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    
 }
 
 .logo-wrap {

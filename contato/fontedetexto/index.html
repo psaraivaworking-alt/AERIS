@@ -3,676 +3,293 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aeris | Painel Administrativo</title>
+    <title>Painel Administrativo Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --color-deep: #1A1C1E;
-            --color-soft-bg: #F8F9FA;
-            --color-card-bg: #FFFFFF;
-            --color-border: #E9ECEF;
-            --color-accent: #6f42c1; /* Tom roxo de seleção */
-            --color-accent-hover: #5a32a3;
-            --text-muted: #6C757D;
-        }
-
-        * { 
-            margin: 0; 
-            padding: 0; 
-            box-sizing: border-box; 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-        }
-        
-        body {
-            background-color: var(--color-soft-bg);
-            color: var(--color-deep);
-            display: flex;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        ::selection { 
-            background-color: rgba(111, 66, 193, 0.2); 
-            color: var(--color-accent); 
-        }
-
-        /* TELA DE LOGIN/CADASTRO INTEGRADA (OVERLAY) */
-        #admin-auth-overlay {
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            width: 100vw; 
-            height: 100vh;
-            background: var(--color-soft-bg); 
-            z-index: 10000;
-            display: flex; 
-            justify-content: center; 
-            align-items: center;
-        }
-        .auth-container {
-            width: 100%; 
-            max-width: 400px; 
-            background: var(--color-card-bg);
-            border: 1px solid var(--color-border); 
-            padding: 40px; 
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
-        }
-        .auth-header { 
-            text-align: center; 
-            margin-bottom: 32px; 
-        }
-        .auth-header h1 { 
-            font-size: 28px; 
-            font-weight: 700; 
-        }
-        .auth-header h1 span { 
-            color: var(--color-accent); 
-        }
-        .auth-header p { 
-            color: var(--text-muted); 
-            font-size: 14px; 
-            margin-top: 6px; 
-        }
-        .switch-auth { 
-            text-align: center; 
-            margin-top: 20px; 
-            font-size: 13px; 
-            color: var(--text-muted); 
-        }
-        .switch-auth a { 
-            color: var(--color-accent); 
-            text-decoration: none; 
-            font-weight: 500; 
-            cursor: pointer; 
-        }
-
-        /* ESTRUTURA DO PAINEL */
-        .sidebar {
-            width: 260px; 
-            background: var(--color-deep); 
-            color: #fff;
-            padding: 24px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 8px; 
-            flex-shrink: 0;
-        }
-        .sidebar-brand { 
-            font-size: 22px; 
-            font-weight: 700; 
-            margin-bottom: 32px; 
-            padding-left: 8px; 
-        }
-        .sidebar-brand span { 
-            color: var(--color-accent); 
-        }
-        
-        .sidebar-item {
-            padding: 12px 16px; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            display: flex;
-            align-items: center; 
-            gap: 12px; 
-            font-size: 14px; 
-            font-weight: 500;
-            color: #A0A5AA; 
-            transition: all 0.2s;
-        }
-        .sidebar-item:hover, .sidebar-item.active { 
-            background: rgba(255,255,255,0.05); 
-            color: #fff; 
-        }
-        .sidebar-item.active { 
-            border-left: 4px solid var(--color-accent); 
-            border-radius: 0 8px 8px 0; 
-        }
-        .sidebar-footer { 
-            margin-top: auto; 
-            padding-top: 16px; 
-        }
-
-        /* Conteúdo Principal */
-        .main-content { 
-            flex-grow: 1; 
-            padding: 40px; 
-            overflow-y: auto; 
-            height: 100vh; 
-        }
-        .admin-tab-content { 
-            display: none; 
-        }
-        .admin-tab-content.active { 
-            display: block; 
-        }
-
-        /* Layout Dividido para Painel Lateral de Membros */
-        .layout-com-lateral {
-            display: flex;
-            gap: 24px;
-            align-items: flex-start;
-        }
-        .coluna-formulario {
-            flex: 1;
-        }
-        .coluna-lateral-membros {
-            width: 300px;
-            flex-shrink: 0;
-            position: sticky;
-            top: 0;
-        }
-
-        /* Cards, Grid e Componentes */
-        .metrics-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
-            gap: 24px; 
-            margin-bottom: 32px; 
-        }
-        .metric-card { 
-            background: var(--color-card-bg); 
-            border: 1px solid var(--color-border); 
-            padding: 24px; 
-            border-radius: 12px; 
-        }
-        .metric-card h3 { 
-            font-size: 14px; 
-            color: var(--text-muted); 
-            font-weight: 500; 
-            margin-bottom: 8px; 
-        }
-        .metric-card p { 
-            font-size: 32px; 
-            font-weight: 700; 
-        }
-
-        .admin-card { 
-            background: var(--color-card-bg); 
-            border: 1px solid var(--color-border); 
-            padding: 32px; 
-            border-radius: 12px; 
-            margin-bottom: 24px; 
-        }
-        .card-header { 
-            margin-bottom: 20px; 
-        }
-        .card-header h3 { 
-            font-size: 18px; 
-            font-weight: 600; 
-            display: flex; 
-            align-items: center; 
-            gap: 8px; 
-        }
-
-        .form-row { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
-            gap: 16px; 
-            margin-bottom: 16px; 
-        }
-        .form-group { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 6px; 
-        }
-        label { 
-            font-size: 13px; 
-            font-weight: 600; 
-        }
-        input, select, textarea { 
-            padding: 12px; 
-            border: 1px solid var(--color-border); 
-            border-radius: 6px; 
-            font-size: 14px; 
-            outline: none; 
-            transition: border-color 0.2s, box-shadow 0.2s; 
-            background: #fff; 
-        }
-        input:focus, select:focus, textarea:focus { 
-            border-color: var(--color-accent); 
-            box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.1);
-        }
-
-        /* Select customizado compacto para tabelas */
-        .select-status-table {
-            padding: 6px 10px;
-            font-size: 13px;
-            font-weight: 600;
-            border-radius: 4px;
-            cursor: pointer;
-            border: 1px solid var(--color-border);
-            background-color: var(--color-soft-bg);
-        }
-        .select-status-table:focus {
-            border-color: var(--color-accent);
-        }
-
-        /* Box de Opções de Foto Personalizado */
-        .foto-options-box {
-            display: none; 
-            background: rgba(111, 66, 193, 0.04);
-            border: 1px dashed var(--color-accent);
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            align-items: center;
-            gap: 20px;
-            font-size: 13px;
-        }
-        .foto-option-label {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-            font-weight: 500;
-        }
-        .foto-option-label input {
-            accent-color: var(--color-accent);
-            cursor: pointer;
-        }
-
-        .btn-action {
-            background: var(--color-deep); 
-            color: #fff; 
-            border: none; 
-            padding: 12px 24px;
-            border-radius: 6px; 
-            font-size: 14px; 
-            font-weight: 500; 
-            cursor: pointer; 
-            transition: background 0.2s;
-            display: inline-flex; 
-            align-items: center; 
-            gap: 8px; 
-            width: 100%; 
-            justify-content: center;
-        }
-        .btn-action:hover { 
-            background: #2A2D30; 
-        }
-        .btn-accent { 
-            background: var(--color-accent); 
-        }
-        .btn-accent:hover { 
-            background: var(--color-accent-hover); 
-        }
-
-        /* Tabelas */
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            margin-top: 16px; 
-            text-align: left; 
-        }
-        th { 
-            padding: 14px; 
-            border-bottom: 2px solid var(--color-border); 
-            font-size: 13px; 
-            font-weight: 600; 
-            color: var(--text-muted); 
-        }
-        td { 
-            padding: 14px; 
-            border-bottom: 1px solid var(--color-border); 
-            font-size: 14px; 
-            vertical-align: middle;
-        }
-        
-        .badge { 
-            padding: 4px 8px; 
-            border-radius: 4px; 
-            font-size: 11px; 
-            font-weight: 700; 
-            text-transform: uppercase; 
-            display: inline-block;
-        }
-        .badge-success { background: #E6F4EA; color: #137333; }
-        .badge-warn { background: #FEF7E0; color: #B06000; }
-        .badge-prod { background: #E8F0FE; color: #1A73E8; }
-        .badge-danger { background: #FCE8E6; color: #C5221F; }
-
-        .actions-cell { 
-            display: flex; 
-            align-items: center; 
-            gap: 12px; 
-        }
-        .actions-cell button { 
-            background: none; 
-            border: none; 
-            cursor: pointer; 
-            font-size: 16px; 
-            padding: 4px; 
-            width: auto; 
-            color: var(--text-muted);
-            transition: color 0.2s;
-        }
-        .actions-cell button:hover {
-            color: var(--color-accent);
-        }
-        .actions-cell button.btn-del-table:hover {
-            color: #ff4d4d;
-        }
-
-        .products-admin-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
-            gap: 24px; 
-            margin-top: 20px; 
-        }
-        .product-admin-card { 
-            background: var(--color-card-bg); 
-            border: 1px solid var(--color-border); 
-            border-radius: 12px; 
-            overflow: hidden; 
-            display: flex; 
-            flex-direction: column; 
-        }
-        .product-card-img { 
-            height: 180px; 
-            background-size: cover; 
-            background-position: center; 
-            background-color: #E9ECEF; 
-        }
-        .product-card-body { 
-            padding: 20px; 
-            flex-grow: 1; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: space-between; 
-            gap: 16px; 
-        }
-
-        /* Toasts */
-        #global-toast-container { 
-            position: fixed; 
-            bottom: 24px; 
-            right: 24px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 10px; 
-            z-index: 11000; 
-        }
-        .toast {
-            background: var(--color-deep); 
-            color: #fff; 
-            padding: 14px 24px; 
-            border-radius: 6px; 
-            font-size: 14px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
-            display: flex; 
-            align-items: center; 
-            transform: translateX(120%); 
-            transition: transform 0.3s ease; 
-            border-left: 4px solid #28a745;
-        }
-        .toast.show { 
-            transform: translateX(0); 
-        }
-        .toast.error { 
-            border-left-color: #ff4d4d; 
-        }
-    </style>
+    <link rel="stylesheet" href="/contato/fontedetexto/index.css">
 </head>
 <body>
 
-    <div id="admin-auth-overlay">
-        <div class="auth-container">
-            <div class="auth-header">
-                <h1 id="auth-title">Aeris<span>.</span></h1>
-                <p id="auth-subtitle">Faça login para acessar o painel</p>
-            </div>
-
+    <div id="admin-auth-overlay" class="auth-overlay">
+        <div class="auth-card">
+            <h2 id="auth-title">Painel Administrativo</h2>
+            <p id="auth-subtitle">Faça login para acessar o painel</p>
             <form id="auth-form">
-                <div class="form-group" id="group-nome" style="display: none; margin-bottom: 20px;">
+                <div class="form-group" id="group-nome" style="display: none;">
                     <label for="user-nome">Nome Completo</label>
                     <input type="text" id="user-nome" placeholder="Seu nome">
                 </div>
-                <div class="form-group" style="margin-bottom: 20px;">
+                <div class="form-group">
                     <label for="user-email">E-mail</label>
                     <input type="email" id="user-email" required placeholder="seu@email.com">
                 </div>
-                <div class="form-group" style="margin-bottom: 20px;">
+                <div class="form-group">
                     <label for="user-password">Senha</label>
                     <input type="password" id="user-password" required placeholder="••••••••">
                 </div>
-                <button type="submit" class="btn-action btn-accent" id="btn-submit-auth">Entrar no Sistema</button>
+                <button type="submit" id="btn-submit-auth" class="btn-primary">Entrar no Sistema</button>
             </form>
-
-            <div class="switch-auth">
-                <span id="switch-text">Não tem uma conta?</span> 
-                <a id="switch-action">Cadastre-se</a>
+            <div class="auth-footer">
+                <span id="switch-text">Não tem uma conta?</span>
+                <button id="switch-action" class="btn-link">Cadastre-se</button>
             </div>
         </div>
     </div>
 
-    <aside class="sidebar">
-        <div class="sidebar-brand">Aeris<span>.</span>Admin</div>
-        <nav style="display: flex; flex-direction: column; gap: 4px;">
-            <div class="sidebar-item active" data-tab="tab-dashboard">
-                <i class="fa-solid fa-chart-pie"></i> Dashboard
-            </div>
-            <div class="sidebar-item" data-tab="tab-production">
-                <i class="fa-solid fa-industry"></i> Linha de Produção
-            </div>
-            <div class="sidebar-item" data-tab="tab-vitrine">
-                <i class="fa-solid fa-boxes-stacked"></i> Vitrine de Projetos
-            </div>
-            <div class="sidebar-item" data-tab="tab-usuarios">
-                <i class="fa-solid fa-users-gear"></i> Controle de Usuários
-            </div>
-        </nav>
-        <div class="sidebar-footer">
-            <div class="sidebar-item" id="admin-logout-btn" style="color: #ff4d4d;">
-                <i class="fa-solid fa-right-from-bracket"></i> Desconectar
+    <div id="mode-selection-overlay" class="mode-overlay" style="display: none;">
+        <div class="mode-container">
+            <h2>Selecione o Modo de Trabalho</h2>
+            <p>Escolha qual ecossistema deseja gerenciar agora:</p>
+            <div class="mode-cards">
+                <div class="mode-card" data-mode="colabs">
+                    <i class="fa-solid fa-users-gear"></i>
+                    <h3>Colabs</h3>
+                    <p>Gerenciamento de equipe, linha de produção padrão, estoques e arquitetos.</p>
+                </div>
+                <div class="mode-card" data-mode="projetos">
+                    <i class="fa-solid fa-folder-open"></i>
+                    <h3>Projetos Pessoais</h3>
+                    <p>Vitrine customizada, itens exclusivos com controle de frações (X/Y) e sem vínculo de arquitetos.</p>
+                </div>
             </div>
         </div>
-    </aside>
+    </div>
 
-    <main class="main-content">
-
-        <section id="tab-dashboard" class="admin-tab-content active">
-            <div class="metrics-grid">
-                <div class="metric-card">
-                    <h3>Pedidos em Andamento</h3>
-                    <p id="metric-pedidos-ativos">0</p>
-                </div>
-                <div class="metric-card">
-                    <h3>Produtos na Vitrine</h3>
-                    <p id="metric-total-produtos">0</p>
-                </div>
-                <div class="metric-card">
-                    <h3>Usuários do Sistema</h3>
-                    <p id="metric-total-usuarios">0</p>
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h3>Painel Admin</h3>
+                <div class="mode-switcher-badge" id="quick-mode-switcher">
+                    <span id="active-mode-text">Modo: Colabs</span>
+                    <i class="fa-solid fa-arrows-rotate"></i>
                 </div>
             </div>
-
-            <div class="admin-card">
-                <div class="card-header">
-                    <h3><i class="fa-solid fa-rocket"></i> Boas-vindas ao Controle Central</h3>
-                    <p style="font-size: 14px; color: var(--text-muted); margin-top: 4px;">Utilize o menu lateral para gerenciar os fluxos operacionais da Aeris.</p>
-                </div>
+            <nav class="sidebar-menu">
+                <div class="sidebar-item active" data-tab="tab-pedidos"><i class="fa-solid fa-industry"></i> Produção</div>
+                <div class="sidebar-item" data-tab="tab-vitrine"><i class="fa-solid fa-boxes-stacked"></i> Vitrine</div>
+                <div class="sidebar-item" data-tab="tab-categorias"><i class="fa-solid fa-folder-tree"></i> Categorias</div>
+                <div class="sidebar-item" data-tab="tab-usuarios"><i class="fa-solid fa-users"></i> Usuários</div>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="admin-logout-btn" class="btn-logout"><i class="fa-solid fa-right-from-bracket"></i> Sair</button>
             </div>
-        </section>
+        </aside>
 
-        <section id="tab-production" class="admin-tab-content">
-            <div class="layout-com-lateral">
-                <div class="coluna-formulario">
-                    <div class="admin-card">
-                        <div class="card-header">
-                            <h3 id="form-pedido-title"><i class="fa-solid fa-square-plus"></i> Abrir Nova Linha de Produção</h3>
-                        </div>
-                        <form id="form-add-pedido">
-                            <input type="hidden" id="ped-id-edicao" value="">
-                            
-                            <div class="form-row">
+        <main class="main-content">
+            
+            <section id="tab-pedidos" class="admin-tab-content active">
+                <div class="tab-header">
+                    <h2><i class="fa-solid fa-industry"></i> Linha de Produção / Pedidos</h2>
+                    <div class="metric-card-mini">Pedidos Ativos: <span id="metric-pedidos-ativos">0</span></div>
+                </div>
+                <div class="tab-grid">
+                    <div class="grid-form">
+                        <div class="card-box">
+                            <h3 id="form-pedido-title"><i class="fa-solid fa-square-plus"></i> Abrir Nova Linha de Production</h3>
+                            <form id="form-add-pedido">
+                                <input type="hidden" id="ped-id-edicao">
                                 <div class="form-group">
-                                    <label for="ped-email">Vincular E-mail do Cliente</label>
-                                    <input type="email" id="ped-email" required placeholder="cliente@email.com">
+                                    <label>E-mail do Cliente</label>
+                                    <input type="email" id="ped-email" required>
                                 </div>
                                 <div class="form-group">
-                                    <label for="ped-projeto-adquirido">Produto / Projeto Adquirido</label>
-                                    <input type="text" id="ped-projeto-adquirido" required placeholder="Ex: Cadeira Gamer Neon ou Projeto Loft Pro">
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="ped-responsavel">Membro Responsável</label>
-                                    <input type="text" id="ped-responsavel" placeholder="Selecione um membro no painel ao lado" readonly style="background: #f1f3f5; cursor: not-allowed;">
+                                    <label>Projeto Adquirido</label>
+                                    <input type="text" id="ped-projeto-adquirido" required>
                                 </div>
                                 <div class="form-group">
-                                    <label for="ped-status">Status / Etapa do Projeto</label>
+                                    <label>Responsável</label>
+                                    <input type="text" id="ped-responsavel" placeholder="Selecione na lista lateral ou digite">
+                                </div>
+                                <div class="form-group">
+                                    <label>Status Operacional</label>
                                     <select id="ped-status">
-                                        <option value="Aguardando Início">Aguardando Início</option>
-                                        <option value="Design & Planejamento">Design & Planejamento</option>
-                                        <option value="Em Fabricação">Em Fabricação</option>
-                                        <option value="Acabamento & Polimento">Acabamento & Polimento</option>
-                                        <option value="Controle de Qualidade">Controle de Qualidade</option>
-                                        <option value="Pronto para Entrega">Pronto para Entrega</option>
+                                        <option value="Fabricação">Fabricação</option>
+                                        <option value="Manutenção">Manutenção</option>
+                                        <option value="Acabamento">Acabamento</option>
+                                        <option value="Entrega">Entrega</option>
                                         <option value="Finalizado">Finalizado</option>
                                     </select>
                                 </div>
-                            </div>
-
-                            <div class="form-group" style="margin-bottom: 16px;">
-                                <label for="ped-desc">Descrição Opcional / Especificações Customizadas do Cliente</label>
-                                <textarea id="ped-desc" rows="3" placeholder="Detalhes de personalização, prazos acordados ou ajustes de materiais sob demanda..."></textarea>
-                            </div>
-                            
-                            <button type="submit" class="btn-action btn-accent" style="width:auto;">
-                                <i class="fa-solid fa-floppy-disk"></i> Salvar na Produção
-                            </button>
-                        </form>
+                                <div class="form-group">
+                                    <label>Descrição / Detalhes</label>
+                                    <textarea id="ped-desc" rows="3"></textarea>
+                                </div>
+                                <button type="submit" class="btn-primary">Salvar Encomenda</button>
+                            </form>
+                        </div>
                     </div>
+                    <div class="grid-sidebar-list" id="lista-membros-pedidos"></div>
                 </div>
-                
-                <div class="coluna-lateral-membros">
-                    <div class="admin-card" style="padding: 20px;" id="lista-membros-pedidos"></div>
-                </div>
-            </div>
 
-            <div class="admin-card">
-                <div class="card-header">
-                    <h3><i class="fa-solid fa-list-check"></i> Monitoramento de Encomendas Ativas</h3>
-                    <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Você pode alterar o status do andamento do projeto diretamente na tabela para atualização imediata.</p>
-                </div>
-                <div style="overflow-x: auto;">
+                <div class="card-box table-container">
                     <table>
                         <thead>
                             <tr>
-                                <th>ID PEDIDO</th>
-                                <th>CLIENTE</th>
-                                <th>DETALHES DO PEDIDO</th> <th style="width: 220px;">STATUS DE ANDAMENTO</th>
-                                <th style="text-align: center;">AÇÕES</th>
+                                <th>ID</th>
+                                <th>Cliente</th>
+                                <th>Detalhes do Projeto</th>
+                                <th>Status</th>
+                                <th>Ações</th>
                             </tr>
                         </thead>
                         <tbody id="table-admin-pedidos"></tbody>
                     </table>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <section id="tab-vitrine" class="admin-tab-content">
-            <div class="layout-com-lateral">
-                <div class="coluna-formulario">
-                    <div class="admin-card">
-                        <div class="card-header">
+            <section id="tab-vitrine" class="admin-tab-content">
+                <div class="tab-header">
+                    <h2><i class="fa-solid fa-boxes-stacked"></i> Vitrine de Projetos e Produtos</h2>
+                    <div class="metric-card-mini">Total Itens: <span id="metric-total-produtos">0</span></div>
+                </div>
+                <div class="tab-grid">
+                    <div class="grid-form">
+                        <div class="card-box">
                             <h3 id="form-vitrine-title"><i class="fa-solid fa-folder-plus"></i> Cadastrar Novo Projeto/Produto</h3>
+                            <form id="form-add-projeto">
+                                <input type="hidden" id="proj-id-edicao">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Nome do Produto</label>
+                                        <input type="text" id="proj-nome" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Preço (R$)</label>
+                                        <input type="number" step="0.01" id="proj-preco" required>
+                                    </div>
+                                </div>
+
+                                <div class="form-row id-campo-colab">
+                                    <div class="form-group">
+                                        <label>Arquiteto / Responsável</label>
+                                        <input type="text" id="proj-arquiteto" value="Geral">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Quantidade em Estoque</label>
+                                        <input type="number" id="proj-estoque" value="0">
+                                    </div>
+                                </div>
+
+                                <div class="form-row id-campo-projeto" style="display:none;">
+                                    <div class="form-group checkbox-group">
+                                        <label><input type="checkbox" id="proj-exclusivo"> Item Exclusivo de Coleção</label>
+                                    </div>
+                                    <div class="form-group id-estoque-fracionado" style="display:none;">
+                                        <div style="display:flex; gap:10px;">
+                                            <div>
+                                                <label>Qtd Atual</label>
+                                                <input type="number" id="proj-qtd-atual" value="10">
+                                            </div>
+                                            <div>
+                                                <label>Qtd Total</label>
+                                                <input type="number" id="proj-qtd-total" value="10">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Categoria</label>
+                                        <select id="proj-categoria"></select>
+                                    </div>
+                                     <div class="form-group">
+        <label>Subcategoria (Opcional)</label>
+        <select id="proj-subcategoria">
+            <option value="">-- Selecione uma Categoria primeiro --</option>
+        </select>
+    </div>
+                                    <div class="form-group">
+                                        <label>Imagens do Projeto</label>
+                                        <input type="file" id="proj-file" accept="image/*" multiple>
+                                    </div>
+                                </div>
+
+                                <div id="opcoes-fotos-edicao" class="form-group" style="display:none; gap:15px; margin-bottom:10px;">
+                                    <label><input type="radio" name="modo-foto" value="manter" checked> Manter fotos existentes e adicionar novas</label>
+                                    <label><input type="radio" name="modo-foto" value="substituir"> Substituir todas as fotos pelas novas</label>
+                                </div>
+
+                                <div id="img-preview-container" class="preview-box"></div>
+
+                                <div class="form-group">
+                                    <label>Descrição do Item</label>
+                                    <textarea id="proj-desc" rows="3"></textarea>
+                                </div>
+
+                                <button type="submit" id="btn-submit-projeto" class="btn-primary"><i class="fa-solid fa-floppy-disk"></i> Salvar Produto na Vitrine</button>
+                            </form>
                         </div>
-                        <form id="form-add-projeto">
-                            <input type="hidden" id="proj-id-edicao" value="">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="proj-nome">Nome do Item</label>
-                                    <input type="text" id="proj-nome" required placeholder="Ex: Cadeira Executiva Premium">
-                                </div>
-                                <div class="form-group">
-                                    <label for="proj-preco">Preço de Venda (R$)</label>
-                                    <input type="number" id="proj-preco" step="0.01" required placeholder="0.00">
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="proj-categoria">Categoria do Projeto / Linha</label>
-                                    <input type="text" id="proj-categoria" required placeholder="Ex: Residencial, Comercial, Premium">
-                                </div>
-                                <div class="form-group">
-                                    <label for="proj-arquiteto">Nome do Arquiteto Responsável</label>
-                                    <input type="text" id="proj-arquiteto" placeholder="Digite ou selecione um membro ao lado">
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="proj-desc">Breve Descrição Comercial</label>
-                                    <input type="text" id="proj-desc" required placeholder="Ex: Modelo ergonômico...">
-                                </div>
-                                <div class="form-group">
-                                    <label for="proj-estoque">Quantidade em Estoque</label>
-                                    <input type="number" id="proj-estoque" min="0" required placeholder="Ex: 10" value="0">
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group" style="grid-column: span 2;">
-                                    <label for="proj-file">Fotografias do Produto (Selecione uma ou mais)</label>
-                                    <input type="file" id="proj-file" accept="image/*" multiple>
-                                </div>
-                            </div>
+                    </div>
+                    <div class="grid-sidebar-list" id="lista-membros-vitrine"></div>
+                </div>
 
-                            <div id="opcoes-fotos-edicao" class="foto-options-box">
-                                <span style="font-weight:700; color:var(--color-accent);">Fotos do produto existente:</span>
-                                <label class="foto-option-label">
-                                    <input type="radio" name="modo-foto" value="manter" checked> Manter e Somar Novas
-                                </label>
-                                <label class="foto-option-label">
-                                    <input type="radio" name="modo-foto" value="substituir"> Substituir Todas por Novas
-                                </label>
-                            </div>
+                <div class="container-admin-produtos-wrapper">
+                    <h3>Itens Cadastrados</h3>
+                    <div id="container-admin-produtos" class="products-grid"></div>
+                </div>
+            </section>
 
-                            <div id="img-preview-container" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom: 20px;"></div>
-                            <button type="submit" id="btn-submit-projeto" class="btn-action btn-accent" style="width:auto;"><i class="fa-solid fa-floppy-disk"></i> Salvar Produto na Vitrine</button>
+            <section id="tab-categorias" class="admin-tab-content">
+                <div class="tab-header">
+                    <h2><i class="fa-solid fa-folder-tree"></i> Estrutura de Categorias e Subcategorias</h2>
+                </div>
+                <div class="tab-grid grid-categorias-layout">
+                    <div class="card-box">
+                        <h3><i class="fa-solid fa-plus"></i> Nova Categoria Mãe</h3>
+                        <form id="form-add-categoria">
+                            <div class="form-group">
+                                <label>Nome da Categoria</label>
+                                <input type="text" id="cat-nome" required placeholder="Ex: Tintas Automotivas">
+                            </div>
+                            <button type="submit" class="btn-primary">Criar Categoria</button>
+                        </form>
+
+                        <hr style="margin: 20px 0; border:0; border-top:1px solid var(--color-border);">
+
+                        <h3><i class="fa-solid fa-folder-plus"></i> Injetar Subcategoria</h3>
+                        <form id="form-add-subcategoria">
+                            <div class="form-group">
+                                <label>Selecionar Categoria Pai</label>
+                                <select id="sub-cat-pai-select" required></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Nome da Subcategoria</label>
+                                <input type="text" id="sub-cat-nome" required placeholder="Ex: Sintéticas">
+                            </div>
+                            <button type="submit" class="btn-primary bg-accent">Anexar Subcategoria</button>
                         </form>
                     </div>
-                </div>
 
-                <div class="coluna-lateral-membros">
-                    <div class="admin-card" style="padding: 20px;" id="lista-membros-vitrine"></div>
+                    <div class="card-box">
+                        <h3><i class="fa-solid fa-arrow-down-up-lock"></i> Ordenação Reordenável (Arraste e Solte)</h3>
+                        <p style="font-size:12px; color:var(--text-muted); margin-bottom:15px;">Arraste os blocos verticalmente para definir a prioridade de exibição na vitrine.</p>
+                        <div id="drag-drop-container-categorias" class="dd-container"></div>
+                    </div>
                 </div>
-            </div>
+            </section>
 
-            <div class="admin-card">
-                <div class="card-header">
-                    <h3><i class="fa-solid fa-store"></i> Portfólio Publicado na Vitrine</h3>
+            <section id="tab-usuarios" class="admin-tab-content">
+                <div class="tab-header">
+                    <h2><i class="fa-solid fa-users"></i> Controle de Usuários Globais</h2>
+                    <div class="metric-card-mini">Cadastrados: <span id="metric-total-usuarios">0</span></div>
                 </div>
-                <div class="products-admin-grid" id="container-admin-produtos"></div>
-            </div>
-        </section>
-
-        <section id="tab-usuarios" class="admin-tab-content">
-            <div class="admin-card">
-                <div class="card-header">
-                    <h3><i class="fa-solid fa-users-gear"></i> Controle de Permissões (Usuários)</h3>
-                    <p style="font-size: 14px; color: var(--text-muted); margin-top: 4px;">Ative (true) ou desative (false) o acesso administrativo das contas cadastradas.</p>
-                </div>
-                <div style="overflow-x: auto;">
+                <div class="card-box table-container">
                     <table>
                         <thead>
                             <tr>
-                                <th>NOME</th>
-                                <th>E-MAIL</th>
-                                <th>CARGO / STATUS</th>
-                                <th>AÇÃO PERMISSÃO</th>
+                                <th>Nome</th>
+                                <th>E-mail</th>
+                                <th>Status de Permissão</th>
+                                <th>Alterar Acesso</th>
                             </tr>
                         </thead>
                         <tbody id="table-admin-usuarios"></tbody>
                     </table>
                 </div>
-            </div>
-        </section>
+            </section>
 
-    </main>
-
-    <div id="global-toast-container"></div>
+        </main>
+    </div>
 
     <script type="module" src="/contato/fontedetexto/main.js"></script>
 </body>

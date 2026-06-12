@@ -1,5 +1,5 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyACpXbLGy6bA2MGGPvItUGY_Izi0jgO5wQ",
@@ -13,252 +13,314 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-let localProductsCache = [];
-let cart = JSON.parse(localStorage.getItem('aeris_cart')) || [];
+// Estado Global da Aplicação
+let todosOsProjetos = [];
+let todasAsCategorias = []; // <-- NOVO: Armazena a estrutura oficial vinda do Firestore
+
+let filtroCategoria = "todos";    // Vai guardar o NOME da categoria (Ex: "Casa")
+let filtroSubcategoria = "todos"; // Vai guardar o NOME da subcategoria (Ex: "Interna")
+
+// Seletores DOM
+const gridProjetos = document.getElementById('grid-projetos');
+const categoriasContainer = document.getElementById('categorias-container');
+const subcategoriasContainer = document.getElementById('subcategorias-container');
+const subcategoriasRow = document.getElementById('subcategorias-row');
+const viewLista = document.getElementById('view-lista');
+const viewInterna = document.getElementById('view-interna');
+const btnVoltarLista = document.getElementById('btn-voltar-lista');
 
 document.addEventListener('DOMContentLoaded', () => {
-    
-    // Controles de Interface Existentes
-    const hamburgerBtn = document.getElementById('hamburger-btn');
-    const navWrapper = document.getElementById('nav-wrapper');
-    if (hamburgerBtn && navWrapper) {
-        hamburgerBtn.addEventListener('click', () => {
-            hamburgerBtn.classList.toggle('open');
-            navWrapper.classList.toggle('open');
+    inicializarNavegacao();
+    ouvirBancoDeDados();
+});
+
+function inicializarNavegacao() {
+    if (btnVoltarLista) {
+        btnVoltarLista.addEventListener('click', () => {
+            removerParametroUrl();
+            exibirEstruturaVitrine();
         });
     }
+    window.addEventListener('popstate', verificarParametrosUrl);
+}
 
-    const openCartBtn = document.getElementById('open-cart-btn');
-    const closeCartBtn = document.getElementById('close-cart-btn');
-    const cartPanel = document.getElementById('cart-sidebar-panel');
-    if(openCartBtn && closeCartBtn && cartPanel) {
-        openCartBtn.addEventListener('click', () => cartPanel.classList.add('open'));
-        closeCartBtn.addEventListener('click', () => cartPanel.classList.remove('open'));
-    }
-
-    // NOVOS ELEMENTOS DA MODAL QUICK VIEW
-    const quickviewModal = document.getElementById('quickview-modal');
-    const modalContent = document.querySelector('.product-modal-content');
-    const closeOverlay = document.getElementById('close-modal-overlay');
-    const closeModalBtn = document.getElementById('close-modal-btn');
-
-    function fecharModal() {
-        if(quickviewModal) quickviewModal.classList.remove('open');
-    }
-    if(closeOverlay) closeOverlay.addEventListener('click', fecharModal);
-    if(closeModalBtn) closeModalBtn.addEventListener('click', fecharModal);
-
-    // CONEXÃO FIRESTORE COM INTEGRAÇÃO DE DETALHES
-    const catalogContainer = document.getElementById('dynamic-categories-container');
-
+// Escuta ativa de ambas as coleções em paralelo
+function ouvirBancoDeDados() {
+    // 1. ESCUTA OS PROJETOS/PRODUTOS
     onSnapshot(collection(db, "projetos"), (snapshot) => {
-        if(!catalogContainer) return;
-        catalogContainer.innerHTML = "";
-        let rawProducts = [];
-
-        if(snapshot.empty) {
-            catalogContainer.innerHTML = `<p class="cart-empty-message">Nenhum projeto publicado no momento.</p>`;
-            localProductsCache = [];
-            return;
-        }
-
-        snapshot.forEach(docSnap => {
-            const data = docSnap.data();
-            rawProducts.push({ id: docSnap.id, ...data });
-        });
-
-        localProductsCache = rawProducts;
-
-        const groupedByLinha = {};
-        rawProducts.forEach(product => {
-            const linhaNome = product.linha ? product.linha.trim() : "Móvel Autoral";
-            if (!groupedByLinha[linhaNome]) groupedByLinha[linhaNome] = [];
-            groupedByLinha[linhaNome].push(product);
-        });
-
-        const sortedLinhas = Object.keys(groupedByLinha).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
-
-        sortedLinhas.forEach(linha => {
-            const productsInLinha = groupedByLinha[linha].sort((a, b) => {
-                const nomeA = (a.nome || "").toLowerCase();
-                const nomeB = (b.nome || "").toLowerCase();
-                return nomeA.localeCompare(nomeB);
+        todosOsProjetos = [];
+        snapshot.forEach((doc) => {
+            const dados = doc.data();
+            todosOsProjetos.push({
+                id: doc.id,
+                nome: dados.nome || "Produto Sem Título",
+                fotos: dados.urlFotos || dados.fotos || [],
+                descricao: dados.descricao || dados.desc || "Produto autoral exclusivo AERIS Studio.",
+                categoria: dados.categoria || "Geral",       // Aqui o projeto guarda o nome (Ex: "Casa")
+                subcategoria: dados.subcategoria || "",   // Aqui o projeto guarda o nome (Ex: "Interna")
+                arquiteto: dados.arquiteto || "AERIS Studio",
+                cidade: dados.cidade || "São Paulo",
+                estado: dados.estado || "SP",
+                ano: dados.ano || "2026",
+                materiais: dados.materials || dados.materiais || "Materiais nobres sob consulta.",
+                area: dados.area || "Sob consulta"
             });
-
-            const categoryBlock = document.createElement('div');
-            categoryBlock.className = 'category-block';
-
-            const blockTitle = document.createElement('h2');
-            blockTitle.className = 'category-block-title';
-            blockTitle.textContent = linha;
-            categoryBlock.appendChild(blockTitle);
-
-            const projectsGrid = document.createElement('div');
-            projectsGrid.className = 'projects-grid';
-
-            productsInLinha.forEach(product => {
-                const coverImage = (product.urlFotos && product.urlFotos.length > 0) ? product.urlFotos[0] : 'https://images.unsplash.com/photo-1538688525198-9b88f6f53126?auto=format&fit=crop&w=800&q=80';
-                const priceFormatted = parseFloat(product.preco || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-
-                projectsGrid.innerHTML += `
-                    <article class="project-item-card" data-id="${product.id}" style="cursor: pointer;">
-                        <div class="project-item-image-wrapper">
-                            <img src="${coverImage}" alt="${product.nome}" loading="lazy">
-                        </div>
-                        <span class="project-item-meta">${product.categoria || 'Geral'}</span>
-                        <h3 class="project-item-title">${product.nome}</h3>
-                        <p class="project-item-description">${product.descricao || ''}</p>
-                        <div class="project-item-footer">
-                            <span class="project-item-price">${priceFormatted}</span>
-                            <button class="btn-add-cart" data-id="${product.id}">Adicionar ao Acervo</button>
-                        </div>
-                    </article>
-                `;
-            });
-
-            categoryBlock.appendChild(projectsGrid);
-            catalogContainer.appendChild(categoryBlock);
         });
 
-        // Aplica os cliques inteligentes nos cards e botões
-        bindCardAndCartEvents();
+        // Atualiza a grade sempre que os projetos mudarem
+        renderizarGradeVitrine();
+        verificarParametrosUrl(); 
+    }, (error) => {
+        console.error("Erro Projetos: ", error);
     });
 
-    // EVENTOS DE CLIQUE INTELIGENTES (CARD OU COMPRA DIRETA)
-    function bindCardAndCartEvents() {
-        // 1. Clique no card abre a Modal detalhada
-        document.querySelectorAll('.project-item-card').forEach(card => {
-            card.onclick = (e) => {
-                // Se o clique foi especificamente no botão de adicionar ao carrinho, não abre a modal
-                if(e.target.classList.contains('btn-add-cart')) return;
-
-                const targetId = card.dataset.id;
-                const product = localProductsCache.find(p => p.id === targetId);
-
-                if(product && quickviewModal && modalContent) {
-                    const coverImage = (product.urlFotos && product.urlFotos.length > 0) ? product.urlFotos[0] : 'https://images.unsplash.com/photo-1538688525198-9b88f6f53126?auto=format&fit=crop&w=800&q=80';
-                    const priceFormatted = parseFloat(product.preco || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-
-                    // Injeta a estrutura refinada de duas colunas na modal
-                    modalContent.innerHTML = `
-                        <div class="modal-image-wrapper">
-                            <img src="${coverImage}" alt="${product.nome}">
-                        </div>
-                        <div class="modal-info-side">
-                            <span class="modal-meta">${product.linha || 'Móvel Autoral'} &bull; ${product.categoria || 'Geral'}</span>
-                            <h2 class="modal-title">${product.nome}</h2>
-                            <p class="modal-description">${product.descricao || 'Nenhuma descrição detalhada informada.'}</p>
-                            <div class="modal-price">${priceFormatted}</div>
-                            <button class="btn-luxury-checkout btn-modal-buy" data-id="${product.id}">Adicionar ao Acervo</button>
-                        </div>
-                    `;
-
-                    // Exibe a modal adicionando a classe open
-                    quickviewModal.classList.add('open');
-
-                    // Aplica listener no botão de compra de dentro da modal
-                    document.querySelector('.btn-modal-buy').onclick = (event) => {
-                        colocarNoCarrinho(event.target.dataset.id);
-                        fecharModal();
-                    };
-                }
-            };
+    // 2. ESCUTA A COLEÇÃO OFICIAL DE CATEGORIAS (Conforme seu Print)
+    const qCategorias = query(collection(db, "categorias"), orderBy("ordem", "asc"));
+    onSnapshot(qCategorias, (snapshot) => {
+        todasAsCategorias = [];
+        snapshot.forEach((doc) => {
+            const dados = doc.data();
+            todasAsCategorias.push({
+                id: doc.id,
+                nome: dados.nome,                       // Ex: "Casa"
+                ordem: dados.ordem,                     // Ex: 1
+                subcategorias: dados.subcategorias || [] // Ex: ["Interna"]
+            });
         });
 
-        // 2. Clique direto no botão "Adicionar ao Acervo" do Grid principal
-        document.querySelectorAll('.btn-add-cart').forEach(button => {
-            button.onclick = (e) => {
-                e.stopPropagation(); // Evita ativar o clique do card por acidente
-                colocarNoCarrinho(e.target.dataset.id);
-            };
+        // Renderiza os botões baseando-se estritamente na coleção oficial
+        renderizarFiltrosOficiais();
+    }, (error) => {
+        console.error("Erro Categorias: ", error);
+    });
+}
+
+// GERA OS BOTÕES PRINCIPAIS (COLEÇÃO) USANDO A COLEÇÃO "CATEGORIAS"
+function renderizarFiltrosOficiais() {
+    if (!categoriasContainer) return;
+
+    // Limpa e cria o botão "Ver Tudo"
+    categoriasContainer.innerHTML = `<button class="btn-filter ${filtroCategoria === 'todos' ? 'active' : ''}" data-cat="todos">Ver Tudo</button>`;
+
+    // Cria os botões dinamicamente a partir da coleção oficial do seu Admin
+    todasAsCategorias.forEach(cat => {
+        categoriasContainer.innerHTML += `<button class="btn-filter ${filtroCategoria === cat.nome ? 'active' : ''}" data-cat="${cat.nome}">${cat.nome}</button>`;
+    });
+
+    // Adiciona os eventos de clique
+    categoriasContainer.querySelectorAll('.btn-filter').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            categoriasContainer.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            
+            filtroCategoria = e.target.getAttribute('data-cat');
+            filtroSubcategoria = "todos"; // Reseta segmento ao mudar de coleção
+            
+            gerarSubfiltrosOficiais();
+            renderizarGradeVitrine();
         });
+    });
+
+    // Atualiza a linha de baixo
+    gerarSubfiltrosOficiais();
+}
+
+// GERA OS BOTÕES SECUNDÁRIOS (SEGMENTO) USANDO O ARRAY DE DENTRO DA CATEGORIA SELECIONADA
+function gerarSubfiltrosOficiais() {
+    if (!subcategoriasContainer || !subcategoriasRow) return;
+
+    // Se "Ver Tudo" estiver ativo, esconde os segmentos
+    if (filtroCategoria === 'todos') {
+        subcategoriasRow.style.display = 'none';
+        return;
     }
 
-    // LOGICA AUXILIAR REUTILIZÁVEL PARA ADICIONAR ITEM AO CARRINHO
-    function colocarNoCarrinho(id) {
-        const selectedItem = localProductsCache.find(p => p.id === id);
-        if(selectedItem) {
-            cart.push({
-                id: selectedItem.id,
-                nome: selectedItem.nome,
-                preco: selectedItem.preco,
-                categoria: selectedItem.categoria,
-                imagem: (selectedItem.urlFotos && selectedItem.urlFotos.length > 0) ? selectedItem.urlFotos[0] : ''
+    // Encontra o objeto da categoria atual para ler o array "subcategorias" mapeado no seu Firestore
+    const categoriaAtiva = todasAsCategorias.find(c => c.nome === filtroCategoria);
+
+    // Se não achar ou não tiver subcategorias cadastradas na estrutura, esconde a linha
+    if (!categoriaAtiva || !categoriaAtiva.subcategorias || categoriaAtiva.subcategorias.length === 0) {
+        subcategoriasRow.style.display = 'none';
+        return;
+    }
+
+    // Se tem subcategorias na estrutura, exibe a linha automaticamente
+    subcategoriasRow.style.display = 'flex';
+    subcategoriasContainer.innerHTML = `<button class="btn-filter ${filtroSubcategoria === 'todos' ? 'active' : ''}" data-sub="todos">Todos de ${filtroCategoria}</button>`;
+    
+    // Varre o array ["Interna", ...] que está no documento da categoria
+    categoriaAtiva.subcategorias.forEach(subNome => {
+        subcategoriasContainer.innerHTML += `<button class="btn-filter ${filtroSubcategoria === subNome ? 'sub-active' : ''}" data-sub="${subNome}">${subNome}</button>`;
+    });
+
+    // Adiciona cliques nos botões de segmento
+    subcategoriasContainer.querySelectorAll('.btn-filter').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            subcategoriasContainer.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active', 'sub-active'));
+            
+            filtroSubcategoria = e.target.getAttribute('data-sub');
+            
+            if (filtroSubcategoria === 'todos') {
+                e.target.classList.add('active');
+            } else {
+                e.target.classList.add('sub-active');
+            }
+            
+            renderizarGradeVitrine();
+        });
+    });
+}
+
+function renderizarGradeVitrine() {
+    if (!gridProjetos) return;
+    gridProjetos.innerHTML = '';
+
+    // 1. Cruza os filtros selecionados usando a lógica de ID ou Nome
+    const filtrados = todosOsProjetos.filter(p => {
+        // Encontra o objeto da categoria correspondente ao ID salvo no projeto
+        const objCategoriaDoProjeto = todasAsCategorias.find(c => c.id === p.categoria);
+        const nomeCategoriaDoProjeto = objCategoriaDoProjeto ? objCategoriaDoProjeto.nome : "Geral";
+
+        // Verifica se bate com o filtro ativo (comparando por nome)
+        const checkCat = (filtroCategoria === 'todos' || nomeCategoriaDoProjeto === filtroCategoria);
+        const checkSub = (filtroSubcategoria === 'todos' || p.subcategoria === filtroSubcategoria);
+        return checkCat && checkSub;
+    });
+
+    if (filtrados.length === 0) {
+        gridProjetos.innerHTML = `<div class="loading-placeholder">Nenhuma peça registrada nesta vertente.</div>`;
+        return;
+    }
+
+    // 2. Renderiza os cards traduzindo o ID para o Nome real na tag
+    filtrados.forEach(projeto => {
+        const card = document.createElement('div');
+        card.className = 'aeris-project-card';
+        
+        const capa = (projeto.fotos && projeto.fotos.length > 0) ? projeto.fotos[0] : 'https://placehold.co/600x600?text=AERIS';
+
+        // TRADUÇÃO: Busca o nome legível da categoria para exibir no HTML do card
+        const categoriaObjeto = todasAsCategorias.find(c => c.id === projeto.categoria);
+        const nomeCategoriaExibicao = categoriaObjeto ? categoriaObjeto.nome : "Geral";
+
+        card.innerHTML = `
+            <div class="card-media-wrapper">
+                <img src="${capa}" alt="${projeto.nome}" loading="lazy">
+            </div>
+            <span class="card-meta-tag">${nomeCategoriaExibicao} ${projeto.subcategoria ? '• ' + projeto.subcategoria : ''}</span>
+            <h3 class="card-project-title">${projeto.nome}</h3>
+            <div class="card-project-location">
+                <i class="fa-solid fa-location-dot" style="font-size:10px;"></i> ${projeto.cidade}, ${projeto.estado}
+            </div>
+        `;
+
+        card.addEventListener('click', () => {
+            atualizarParametroUrl(projeto.id);
+            abrirProdutoInterno(projeto);
+        });
+
+        gridProjetos.appendChild(card);
+    });
+}
+
+// Injeção de Conteúdo da Vitrine Interna Simplificada
+function abrirProdutoInterno(projeto) {
+    const tituloEl = document.getElementById('projeto-titulo');
+    const subcatEl = document.getElementById('projeto-subcategoria-tag');
+    const metaEl = document.getElementById('projeto-meta');
+    const descEl = document.getElementById('projeto-descricao');
+    const catInternaEl = document.getElementById('projeto-categoria-interna');
+    const areaEl = document.getElementById('projeto-area');
+    const arqEl = document.getElementById('projeto-arquiteto');
+    const matEl = document.getElementById('projeto-materiais');
+
+    if (tituloEl) tituloEl.textContent = projeto.nome;
+    if (subcatEl) subcatEl.textContent = projeto.subcategoria || projeto.categoria;
+    if (metaEl) metaEl.innerHTML = `<i class="fa-solid fa-location-dot"></i> ${projeto.cidade} — ${projeto.estado} &nbsp;•&nbsp; ${projeto.ano}`;
+    if (descEl) descEl.textContent = projeto.descricao;
+    
+    if (catInternaEl) catInternaEl.textContent = projeto.categoria;
+    if (arqEl) arqEl.textContent = projeto.arquiteto;
+    if (matEl) matEl.textContent = projeto.materiais;
+    
+    if (areaEl) {
+        areaEl.textContent = projeto.area !== "Sob consulta" && !projeto.area.includes('m²') ? `${projeto.area} m²` : projeto.area;
+    }
+
+    const heroBg = document.getElementById('projeto-hero');
+    if (heroBg && projeto.fotos && projeto.fotos.length > 0) {
+        heroBg.style.backgroundImage = `url('${projeto.fotos[0]}')`;
+    }
+
+    const btnWhatsapp = document.getElementById('btn-whatsapp-projeto');
+    if (btnWhatsapp) {
+        const numeroSuporte = "551110401040"; 
+        const mensagem = `Olá AERIS, gostaria de solicitar um atendimento exclusivo referente ao item do acervo: "${projeto.nome}".`;
+        btnWhatsapp.href = `https://api.whatsapp.com/send?phone=${numeroSuporte}&text=${encodeURIComponent(mensagem)}`;
+    }
+
+    const galeria = document.getElementById('projeto-galeria-container');
+    if (galeria) {
+        galeria.innerHTML = '';
+        if (projeto.fotos && projeto.fotos.length > 0) {
+            projeto.fotos.forEach(foto => {
+                const img = document.createElement('img');
+                img.src = foto;
+                img.alt = projeto.nome;
+                img.loading = 'lazy';
+                galeria.appendChild(img);
             });
-            updateCartUI();
-            if(cartPanel) cartPanel.classList.add('open');
         }
     }
 
-    window.removeFromCart = function(index) {
-        cart.splice(index, 1);
-        updateCartUI();
-    };
+    exibirEstruturaInterna();
+}
 
-    function updateCartUI() {
-        localStorage.setItem('aeris_cart', JSON.stringify(cart));
-        const counter = document.getElementById('cart-counter-global');
-        if(counter) counter.textContent = cart.length;
+/* ==========================================================================
+   SISTEMA DE URL DO SCRIPT (DEEP LINK ROUTING)
+   ========================================================================== */
+function atualizarParametroUrl(id) {
+    const novaUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + `?projeto=${id}`;
+    window.history.pushState({ path: novaUrl }, '', novaUrl);
+}
 
-        const itemsWrapper = document.getElementById('cart-items-wrapper');
-        const totalValueEl = document.getElementById('cart-total-value');
-        if(!itemsWrapper) return;
-        itemsWrapper.innerHTML = "";
+function removerParametroUrl() {
+    const urlLimpa = window.location.protocol + "//" + window.location.host + window.location.pathname;
+    window.history.pushState({ path: urlLimpa }, '', urlLimpa);
+}
 
-        if(cart.length === 0) {
-            itemsWrapper.innerHTML = `<p class="cart-empty-message">Seu acervo de intenções está vazio.</p>`;
-            if(totalValueEl) totalValueEl.textContent = "R$ 0,00";
+function verificarParametrosUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const projetoId = urlParams.get('projeto');
+
+    if (projetoId && todosOsProjetos.length > 0) {
+        const projetoEncontrado = todosOsProjetos.find(p => p.id === projetoId);
+        if (projetoEncontrado) {
+            abrirProdutoInterno(projetoEncontrado);
             return;
         }
-
-        let total = 0;
-        cart.forEach((item, index) => {
-            const currentPrice = parseFloat(item.preco) || 0;
-            total += currentPrice;
-            const formattedPrice = currentPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-
-            itemsWrapper.innerHTML += `
-                <div class="cart-item">
-                    <img src="${item.imagem || 'https://placehold.co/100'}" class="cart-item-img" alt="${item.nome}">
-                    <div class="cart-item-details">
-                        <h4 class="cart-item-title">${item.nome}</h4>
-                        <span class="cart-item-price">${formattedPrice}</span>
-                    </div>
-                    <button class="btn-remove-item" onclick="removeFromCart(${index})">Remover</button>
-                </div>
-            `;
-        });
-
-        if(totalValueEl) {
-            totalValueEl.textContent = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        }
     }
+    exibirEstruturaVitrine();
+}
 
-    // WhatsApp Checkout
-    const checkoutBtn = document.getElementById('checkout-whatsapp-btn');
-    if(checkoutBtn) {
-        checkoutBtn.onclick = () => {
-            if(cart.length === 0) return;
-            let message = `Olá AERIS, gostaria de iniciar um atendimento exclusivo e solicitar o orçamento para os seguintes projetos autorais:\n\n`;
-            
-            cart.forEach((item, index) => {
-                const itemVal = (parseFloat(item.preco) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                message += `${index + 1}. *${item.nome}* (${item.categoria || 'Geral'})\n   Valor: ${itemVal}\n\n`;
-            });
+function exibirEstruturaVitrine() {
+    if (!viewInterna || !viewLista) return;
+    viewInterna.classList.remove('active');
+    setTimeout(() => {
+        viewInterna.style.display = 'none';
+        viewLista.style.display = 'block';
+        setTimeout(() => viewLista.classList.add('active'), 50);
+    }, 300);
+}
 
-            let totalSum = cart.reduce((acc, curr) => acc + (parseFloat(curr.preco) || 0), 0);
-            message += `*Total Estimado:* ${totalSum.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}\n\n`;
-            message += `Fico no aguardo para alinhar as especificações técnicas de marcenaria.`;
-
-            const cleanPhone = "5591984794214";
-            const encodedText = encodeURIComponent(message);
-            
-            cart = [];
-            updateCartUI();
-            if(cartPanel) cartPanel.classList.remove('open');
-            window.open(`https://wa.me/${cleanPhone}?text=${encodedText}`, '_blank');
-        };
-    }
-
-    updateCartUI();
-});
+// Certifique-se de que a janela volte ao topo ao abrir um item
+function exibirEstruturaInterna() {
+    if (!viewInterna || !viewLista) return;
+    viewLista.classList.remove('active');
+    setTimeout(() => {
+        viewLista.style.display = 'none';
+        viewInterna.style.display = 'block';
+        setTimeout(() => viewInterna.classList.add('active'), 50);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 300);
+}

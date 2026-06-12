@@ -3,19 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Projetos & Acervo | AERIS</title>
+    <title>Projetos — AERIS</title>
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300&family=Inter:wght@100;200;300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300&family=Inter:wght@200;300;400;500&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="/projetos/padrao.css">
     <link rel="stylesheet" href="/projetos/projeto.css">
 </head>
 <body>
 
-    <header id="dynamic-header" class="scrolled">
+    <header id="dynamic-header">
         <div class="nav-container">
-            <a href="../index.html" class="logo-wrap">
+            <a href="#" class="logo-wrap">
                 <div class="logo-image-container">
                     <img src="https://i.postimg.cc/4mgSP8GJ/Chat-GPT-Image-26-de-mai-de-2026-23-23-15.png" alt="AERIS" class="logo-png">
                 </div>
@@ -24,107 +27,209 @@
             
             <nav class="nav-menu-wrapper" id="nav-wrapper">
                 <ul class="nav-menu">
-                    <li><a href="../index.html" class="nav-link">Home</a></li>
-                    <li><a href="../index.html#manifesto" class="nav-link">O Manifesto</a></li>
-                    <li><a href="../index.html#pilares" class="nav-link">Essência</a></li>
-                    <li><a href="#" class="nav-link active-link">Projetos</a></li>
-                    <li><a href="../index.html#processo" class="nav-link">Processo</a></li>
-                    <li><a href="#contato" class="nav-link">Atendimento</a></li>
+                    <li><a href="/index.html#manifesto" class="nav-link">O Manifesto</a></li>
+                    <li><a href="/index.html#pilares" class="nav-link">Essência</a></li>
+                    <li><a href="/projetos/index.html" class="nav-link">Projetos</a></li>
+                    <li><a href="/index.html#collabs" class="nav-link">Collabs</a></li>
+                    <li><a href="/index.html#processo" class="nav-link">Processo</a></li>
+                    <li><a href="#" id="profile-trigger" class="nav-link profile-btn">Membro</a></li>
                 </ul>
             </nav>
 
             <button class="menu-hamburger" id="hamburger-btn" aria-label="Abrir Menu">
                 <span class="bar"></span>
                 <span class="bar"></span>
-                <span class="bar"></span>
             </button>
         </div>
     </header>
 
-    <section class="projects-hero">
-        <div class="container">
-            <div class="editorial-header">
-                <span class="tag">Acervo Restrito</span>
-                <h2>Projetos Autoriais</h2>
-                <p class="project-section-description">
-                    Criações focadas em textura, presença e permanência. Cada peça carrega a engenharia de movelaria sutil desenvolvida em nosso estúdio.
-                </p>
-            </div>
-        </div>
-    </section>
-
-    <section class="catalog-container">
-        <div class="container" id="dynamic-categories-container">
-            <p class="loading-message">Carregando acervo exclusivo...</p>
-        </div>
-    </section>
-
-    <button class="cart-trigger-fixed" id="open-cart-btn">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-        <div class="cart-count-badge" id="cart-counter-global">0</div>
-    </button>
-
-    <div class="cart-sidebar" id="cart-sidebar-panel">
-        <div class="cart-header">
-            <h2>Seu Diálogo</h2>
-            <button class="cart-close-btn" id="close-cart-btn">&times;</button>
-        </div>
-        
-        <div class="cart-items-list" id="cart-items-wrapper">
-            </div>
-
-        <div class="cart-footer">
-            <div class="cart-total-row">
-                <span>Orçamento Estimado</span>
-                <span id="cart-total-value">R$ 0,00</span>
-            </div>
-            <button class="btn-luxury-checkout" id="checkout-whatsapp-btn">Solicitar via WhatsApp</button>
-        </div>
-    </div>
-
-    <div class="product-modal" id="quickview-modal">
-        <div class="product-modal-overlay" id="close-modal-overlay"></div>
-        <div class="product-modal-container">
-            <button class="product-modal-close" id="close-modal-btn">&times;</button>
-            <div class="product-modal-content">
+    <main>
+        <section id="view-lista" class="app-view active">
+            
+            <section class="hero-banner">
+                <div class="hero-container">
+                    <span class="hero-tag">COLEÇÃO AUTORAL</span>
+                    <h1 class="hero-title">Projetos concebidos para existir apenas uma vez.</h1>
+                    <p class="hero-text">
+                        Cada projeto nasce do encontro entre matéria, espaço e modo de viver. 
+                        Esta seleção reúne ambientes, mobiliários e soluções desenvolvidos exclusivamente para clientes, 
+                        concebidos para contextos específicos e não reproduzidos posteriormente.
+                    </p>
                 </div>
+            </section>
+
+            <section class="section-institucional">
+                <div class="container-text">
+                    <h2>Projetar é interpretar</h2>
+                    <p>Na AERIS acreditamos que nenhum espaço deve receber soluções prontas.</p>
+                    <p>Cada projeto começa pela compreensão profunda do ambiente, das pessoas que irão habitá-lo e da forma como elas desejam viver. Antes do desenho existe a escuta. Antes da matéria existe a intenção.</p>
+                    
+                    <div class="disclaimer-portfolio">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span>Nota: A seção Projetos reúne móveis, ambientes e soluções desenvolvidos exclusivamente. <strong>Isso não está à venda. É um portfólio.</strong></span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section-filtros">
+                <div class="container">
+                    <div class="filter-architecture">
+                        <div class="filter-row">
+                            <span class="filter-label">Coleção</span>
+                            <div id="categorias-container" class="filter-buttons">
+                                </div>
+                        </div>
+                        <div class="filter-row sub-row" id="subcategorias-row" style="display: none;">
+                            <span class="filter-label">Segmento</span>
+                            <div id="subcategorias-container" class="filter-buttons sub-buttons">
+                                </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section-grid-projetos">
+                <div class="container">
+                    <div id="grid-projetos" class="grid-luxury-vitrine">
+                        <div class="loading-placeholder">
+                            <i class="fa-solid fa-spinner fa-spin"></i> Carregando acervo de peças...
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <section id="view-interna" class="app-view">
+            
+            <div class="container-back-nav">
+                <button type="button" id="btn-voltar-lista" class="btn-back">
+                    <i class="fa-solid fa-arrow-left"></i> Voltar à Vitrine
+                </button>
+            </div>
+
+            <div id="projeto-hero" class="project-hero-bg">
+                <div class="project-hero-overlay">
+                    <div class="project-hero-content">
+                        <span id="projeto-subcategoria-tag" class="product-tag-internal">Subcategoria</span>
+                        <h1 id="projeto-titulo">Nome do Produto</h1>
+                        <p id="projeto-meta"><i class="fa-solid fa-location-dot"></i> Localização</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="project-body-wrapper">
+                <div class="container-interna-luxury">
+                    
+                    <div class="product-editorial-layout">
+                        <div class="product-description-side">
+                            <h2 class="editorial-title">A Matéria</h2>
+                            <p id="projeto-descricao" class="editorial-text">Carregando especificações editoriais diretas do acervo...</p>
+                            
+                            <div class="whatsapp-request-wrapper-left">
+                                <a href="#" id="btn-whatsapp-projeto" target="_blank" class="btn-whatsapp-luxury">
+                                    <i class="fa-brands fa-whatsapp"></i> Solicitar Atendimento Exclusivo
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="product-specs-side">
+                            <div class="info-card-luxury">
+                                <h3><i class="fa-solid fa-list-check"></i> Ficha Técnica</h3>
+                                <ul class="specs-luxury-list">
+                                    <li><strong>Coleção / Categoria:</strong> <span id="projeto-categoria-interna">-</span></li>
+                                    <li><strong>Dimensões / Área:</strong> <span id="projeto-area">-</span></li>
+                                    <li><strong>Autoria:</strong> <span id="projeto-arquiteto">-</span></li>
+                                    <li><strong>Materiais Primários:</strong> <span id="projeto-materiais">-</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <section class="project-gallery-section">
+                        <h2><i class="fa-regular fa-images"></i> Galeria de Detalhes</h2>
+                        <p class="gallery-sub">Registros puros do processo, texturas e acabamento final.</p>
+                        <div id="projeto-galeria-container" class="gallery-linear-layout">
+                            </div>
+                    </section>
+
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div class="modal-overlay" id="auth-modal">
+        <div class="modal-card">
+            <button class="modal-close" id="modal-close-btn">&times;</button>
+            <div class="auth-header">
+                <div class="auth-logo-dot"></div>
+                <h3 class="auth-title" id="auth-modal-title">Acessar Estúdio Privado</h3>
+                <p class="auth-subtitle" id="auth-modal-subtitle">Insira suas credenciais de parceiro ou arquiteto exclusivo.</p>
+            </div>
+
+            <form id="login-form" class="auth-form active">
+                <div class="form-group">
+                    <label for="login-email">E-mail Corporativo</label>
+                    <input type="email" id="login-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-pass">Senha de Acesso</label>
+                    <input type="password" id="login-pass" required>
+                </div>
+                <button type="submit" class="btn-luxury dark auth-submit-btn">Entrar no Acervo</button>
+                <div class="form-feedback"></div>
+                <p class="auth-switch-text">Não possui uma chave? <a href="#" id="switch-to-register">Solicitar acesso</a></p>
+            </form>
+
+            <form id="register-form" class="auth-form">
+                <div class="form-group">
+                    <label for="reg-name">Nome Completo / Studio</label>
+                    <input type="text" id="reg-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="reg-email">E-mail Profissional</label>
+                    <input type="email" id="reg-email" required>
+                </div>
+                <button type="submit" class="btn-luxury dark auth-submit-btn">Solicitar Chave</button>
+                <div class="form-feedback"></div>
+                <p class="auth-switch-text">Já possui acesso? <a href="#" id="switch-to-login">Fazer Login</a></p>
+            </form>
         </div>
     </div>
 
-    <footer id="contato">
+    <footer>
         <div class="container">
             <div class="footer-main">
                 <div>
-                    <span class="tag">Atendimento Exclusivo</span>
-                    <h3 class="footer-manifesto-heading">Convidamos você para um diálogo sobre espaço, matéria e identidade.</h3>
-                    <a href="https://wa.me/5591984794214" target="_blank" class="btn-luxury style-footer-btn">Iniciar Diálogo Privado</a>
+                    <span class="tag">AERIS Studio</span>
+                    <h3 class="footer-manifesto-heading">Desenhando a quietude do amanhã através da matéria.</h3>
+                    <a href="#" class="btn-luxury style-footer-btn">Agendar Consultoria Exclusiva</a>
                 </div>
                 <div>
-                    <h4 class="footer-column-title">Portfólio & Escopo</h4>
+                    <h4 class="footer-column-title">Navegação</h4>
                     <ul class="footer-links-list">
-                        <li>Móveis Autorais</li>
-                        <li>Ambientes Sob Medida</li>
-                        <li>Projetos Limitados</li>
-                        <li>Coleções Privadas</li>
+                        <li><a href="index.html">Início</a></li>
+                        <li><a href="projetos.html">Projetos</a></li>
+                        <li><a href="#sobre">O Estúdio</a></li>
+                        <li><a href="#imprensa">Imprensa</a></li>
                     </ul>
                 </div>
                 <div>
-                    <h4 class="footer-column-title">Estúdio Hub</h4>
+                    <h4 class="footer-column-title">Escritórios</h4>
                     <ul class="footer-links-list">
-                        <li><a href="https://instagram.com/aerisfinewoodwork" target="_blank">@AERISFINEWOODWORK</a></li>
-                        <li>Belém &bull; Pará &bull; Brasil</li>
-                        <li>Calma &bull; Contemplação &bull; Exclusividade</li>
+                        <li>São Paulo — Av. Europa, 1040</li>
+                        <li>Lisboa — Chiado, R. Garrett</li>
+                        <li>contato@aerisstudio.com</li>
                     </ul>
                 </div>
             </div>
-            
             <div class="footer-credits">
-                <p>&copy; 2026 AERIS. Crafted with Intention.</p>
-                <p>Designed for Presence</p>
+                <span>&copy; 2026 AERIS. Todos os direitos reservados.</span>
+                <span>Crafted for Permanence</span>
             </div>
         </div>
     </footer>
 
+    <script type="module" src="/script.js"></script>
     <script type="module" src="/projetos/projeto.js"></script>
 </body>
 </html>

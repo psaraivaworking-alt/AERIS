@@ -2,8 +2,11 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
 import { 
     getAuth, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+// CORRIGIDO: Adicionado 'query' e 'orderBy' na lista abaixo
 import { 
-    getFirestore, doc, collection, addDoc, updateDoc, deleteDoc, onSnapshot, getDoc, setDoc 
+    getFirestore, doc, collection, addDoc, updateDoc, deleteDoc, onSnapshot, getDoc, setDoc,
+    query, orderBy, arrayUnion
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const URL_WEB_APP_DRIVE = "https://script.google.com/macros/s/AKfycbysrEYojuSy2-che0TrDVuxWXd_YM_SFAASnsgsFTi6W9UzCNIwNHbNP9J2GfrL5zc9/exec";
@@ -683,3 +686,524 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+// ==========================================
+// CONFIGURAÇÕES E INSTÂNCIAS DO FIREBASE
+// ==========================================
+// Certifique-se de que o seu 'db' e 'auth' vêm do seu arquivo de configuração (ex: firebase-config.js)
+// ou descomente as linhas abaixo importando e configurando sua inicialização:
+//
+// import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+// import { getFirestore, collection, doc, addDoc, onSnapshot, updateDoc, deleteDoc, query, orderBy, arrayUnion } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+// import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+//
+// const app = initializeApp(firebaseConfig);
+// const db = getFirestore(app);
+// const auth = getAuth(app);
+
+// ==========================================
+// STORES INTERNOS E ESTADOS GLOBAIS
+// ==========================================
+let modoAtivo = 'colabs'; // 'colabs' ou 'projetos'
+let listaMembrosCache = [];
+let usuarioLogado = null;
+let arrastandoElemento = null; // Controle do Drag and Drop
+let arrayCategoriasGlobal = []; // Preenchido dinamicamente pelo Firestore
+
+document.addEventListener('DOMContentLoaded', () => {
+    
+    // ==========================================
+    // SELETORES DOM DE INTERFACE E MODOS
+    // ==========================================
+    const overlayAuth = document.getElementById('admin-auth-overlay');
+    const overlayModos = document.getElementById('mode-selection-overlay');
+    const layoutPainel = document.querySelector('.admin-layout');
+    const quickModeSwitcher = document.getElementById('quick-mode-switcher');
+    const activeModeText = document.getElementById('active-mode-text');
+    const authForm = document.getElementById('auth-form');
+    
+    // Elementos Condicionais da Vitrine
+    const camposColab = document.querySelectorAll('.id-campo-colab');
+    const camposProjeto = document.querySelectorAll('.id-campo-projeto');
+    const chkExclusivo = document.getElementById('proj-exclusivo');
+    const blocoEstoqueFracionado = document.querySelector('.id-estoque-fracionado');
+    
+    // Seletores de Categoria e Preço
+    const inputPreco = document.getElementById('proj-preco');
+    const grupoPreco = inputPreco ? inputPreco.closest('.form-group') : null;
+    const selectProjCategoria = document.getElementById('proj-categoria');
+    const selectProjSubcategoria = document.getElementById('proj-subcategoria');
+
+    // ==========================================
+    // FLUXO DE LOGIN (INTEGRADO AO SEU OBSERVER)
+    // ==========================================
+    if (typeof auth !== 'undefined') {
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                usuarioLogado = user;
+                // Esconde a tela de login e abre a seleção dos 2 modos
+                if (overlayAuth) overlayAuth.style.display = 'none';
+                if (overlayModos) overlayModos.style.display = 'flex';
+                
+                // Inicia os escutadores em tempo real do banco de dados
+                ouvirCategoriasDoFirestore();
+                ouvirProdutosDoFirestore();
+            } else {
+                usuarioLogado = null;
+                if (overlayAuth) overlayAuth.style.display = 'flex';
+                if (overlayModos) overlayModos.style.display = 'none';
+                if (layoutPainel) layoutPainel.style.display = 'none';
+            }
+        });
+    }
+
+    // fallback caso use submit manual sem observer ativo
+    if (authForm) {
+        authForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (typeof auth === 'undefined') { 
+                // Apenas para testes locais se o Firebase não estiver instanciado
+                if (overlayAuth) overlayAuth.style.display = 'none';
+                if (overlayModos) overlayModos.style.display = 'flex';
+                ouvirCategoriasDoFirestore();
+                ouvirProdutosDoFirestore();
+            }
+        });
+    }
+
+    // ==========================================
+    // ENGINE DE ALTERNÂNCIA DE MODOS
+    // ==========================================
+    document.querySelectorAll('.mode-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const modoSelecionado = card.getAttribute('data-mode');
+            ativarModoDefinitivo(modoSelecionado);
+            
+            if (overlayModos) overlayModos.style.display = 'none';
+            if (layoutPainel) layoutPainel.style.display = 'flex';
+        });
+    });
+
+    if (quickModeSwitcher) {
+        quickModeSwitcher.addEventListener('click', () => {
+            const novoModo = modoAtivo === 'colabs' ? 'projetos' : 'colabs';
+            ativarModoDefinitivo(novoModo);
+            if (typeof showToast === 'function') {
+                showToast(`Alterado para Modo: ${novoModo.toUpperCase()}`);
+            }
+        });
+    }
+
+    function ativarModoDefinitivo(modo) {
+        modoAtivo = modo;
+        
+        if(modo === 'colabs') {
+            if (activeModeText) activeModeText.textContent = "Modo: Colabs";
+            if (quickModeSwitcher) quickModeSwitcher.style.background = "var(--color-primary)";
+            
+            if (grupoPreco) grupoPreco.style.display = 'flex';
+            camposColab.forEach(el => el.style.display = 'flex');
+            camposProjeto.forEach(el => el.style.display = 'none');
+        } else {
+            if (activeModeText) activeModeText.textContent = "Modo: Projetos";
+            if (quickModeSwitcher) quickModeSwitcher.style.background = "var(--color-accent)";
+            
+            if (grupoPreco) grupoPreco.style.display = 'none';
+            camposColab.forEach(el => el.style.display = 'none');
+            camposProjeto.forEach(el => el.style.display = 'flex');
+            if (chkExclusivo) chkExclusivo.dispatchEvent(new Event('change'));
+        }
+
+        // Re-renderiza os painéis com as regras visuais do novo modo escolhido
+        atualizarPaineisDeCategorias(arrayCategoriasGlobal);
+    }
+
+    if (chkExclusivo) {
+        chkExclusivo.addEventListener('change', () => {
+            if(chkExclusivo.checked && modoAtivo === 'projetos') {
+                blocoEstoqueFracionado.style.display = 'block';
+            } else {
+                blocoEstoqueFracionado.style.display = 'none';
+            }
+        });
+    }
+
+    // GATILHO: Carrega as subcategorias dependendo da categoria mãe selecionada
+    if (selectProjCategoria && selectProjSubcategoria) {
+        selectProjCategoria.addEventListener('change', () => {
+            const idCatSelecionada = selectProjCategoria.value;
+            selectProjSubcategoria.innerHTML = '<option value="">-- Selecione uma Subcategoria (Opcional) --</option>';
+            
+            const categoriaEncontrada = arrayCategoriasGlobal.find(c => c.id === idCatSelecionada);
+            if (categoriaEncontrada && categoriaEncontrada.subcategorias) {
+                categoriaEncontrada.subcategorias.forEach(sub => {
+                    selectProjSubcategoria.add(new Option(sub, sub));
+                });
+            }
+        });
+    }
+
+    // ==========================================
+    // CONTROLE DE ABAS (SPA)
+    // ==========================================
+    const itensMenu = document.querySelectorAll('.sidebar-item');
+    const conteudosAbas = document.querySelectorAll('.admin-tab-content');
+
+    itensMenu.forEach(item => {
+        item.addEventListener('click', () => {
+            itensMenu.forEach(i => i.classList.remove('active'));
+            conteudosAbas.forEach(c => c.classList.remove('active'));
+
+            item.classList.add('active');
+            const targetTab = item.getAttribute('data-tab');
+            const targetElement = document.getElementById(targetTab);
+            if (targetElement) targetElement.classList.add('active');
+        });
+    });
+
+    // ==========================================
+    // ☁️ PERSISTÊNCIA EM TEMPO REAL: CATEGORIAS (FIREBASE)
+    // ==========================================
+    const formCategoria = document.getElementById('form-add-categoria');
+    const formSubcategoria = document.getElementById('form-add-subcategoria');
+    const containerCategorias = document.getElementById('drag-drop-container-categorias');
+    const selectPai = document.getElementById('sub-cat-pai-select');
+
+    function ouvirCategoriasDoFirestore() {
+        if (typeof db === 'undefined') return;
+        
+        // Escuta a coleção "categorias" ordenada pelo campo "ordem"
+        onSnapshot(query(collection(db, "categorias"), orderBy("ordem", "asc")), (snapshot) => {
+            arrayCategoriasGlobal = [];
+            snapshot.forEach((doc) => {
+                arrayCategoriasGlobal.push({ id: doc.id, ...doc.data() });
+            });
+            atualizarPaineisDeCategorias(arrayCategoriasGlobal);
+        }, (error) => {
+            console.error("Erro nas regras de leitura de categorias: ", error);
+        });
+    }
+
+    function atualizarPaineisDeCategorias(listaCats) {
+        if (!containerCategorias) return;
+        containerCategorias.innerHTML = '';
+        
+        if(selectPai) selectPai.innerHTML = '';
+        if(selectProjCategoria) {
+            selectProjCategoria.innerHTML = '';
+            selectProjCategoria.add(new Option('-- Selecione uma Categoria --', ''));
+        }
+        if(selectProjSubcategoria) {
+            selectProjSubcategoria.innerHTML = '<option value="">-- Selecione uma Subcategoria (Opcional) --</option>';
+        }
+
+        listaCats.forEach(cat => {
+            if(selectPai) selectPai.add(new Option(cat.nome, cat.id));
+            if(selectProjCategoria) selectProjCategoria.add(new Option(cat.nome, cat.id));
+
+            const cardCat = document.createElement('div');
+            cardCat.className = 'dd-item-categoria';
+            cardCat.setAttribute('draggable', 'true');
+            cardCat.setAttribute('data-id', cat.id);
+            
+            cardCat.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <strong><i class="fa-solid fa-grip-vertical" style="color:var(--text-muted); margin-right:8px;"></i> ${cat.nome}</strong>
+                    <button type="button" class="btn-link" style="color:var(--color-danger); background:none; border:none; cursor:pointer;" onclick="deletarCategoriaMae('${cat.id}')"><i class="fa-solid fa-trash"></i></button>
+                </div>
+                <div class="subcategories-list"></div>
+            `;
+
+            const subContainer = cardCat.querySelector('.subcategories-list');
+            if(cat.subcategorias && cat.subcategorias.length > 0) {
+                cat.subcategorias.forEach(sub => {
+                    const itemSub = document.createElement('div');
+                    itemSub.className = 'sub-item-badge';
+                    itemSub.innerHTML = `<span>${sub}</span> <i class="fa-solid fa-tags" style="font-size:10px; color:var(--text-muted);"></i>`;
+                    subContainer.appendChild(itemSub);
+                });
+            } else {
+                subContainer.innerHTML = `<span style="font-size:11px; color:var(--text-muted); font-style:italic;">Sem subcategorias vinculadas (Opcional).</span>`;
+            }
+
+            // Listeners do Drag and Drop Nativo
+            cardCat.addEventListener('dragstart', () => {
+                arrastandoElemento = cardCat;
+                cardCat.style.opacity = '0.5';
+            });
+
+            cardCat.addEventListener('dragend', () => {
+                arrastandoElemento = null;
+                cardCat.style.opacity = '1';
+                salvarNovaOrdemCategorias();
+            });
+
+            containerCategorias.appendChild(cardCat);
+        });
+    }
+
+    if (containerCategorias) {
+        containerCategorias.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            const elementoAbaixo = obterElementoAlvoDrop(containerCategorias, e.clientY);
+            if (elementoAbaixo == null) {
+                containerCategorias.appendChild(arrastandoElemento);
+            } else {
+                containerCategorias.insertBefore(arrastandoElemento, elementoAbaixo);
+            }
+        });
+    }
+
+    function obterElementoAlvoDrop(container, y) {
+        const elementosArrastaveis = [...container.querySelectorAll('.dd-item-categoria:not(:focus)')];
+        return elementosArrastaveis.reduce((proximo, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            if (offset < 0 && offset > proximo.offset) {
+                return { offset: offset, element: child };
+            } else {
+                return proximo;
+            }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+    async function salvarNovaOrdemCategorias() {
+        if (typeof db === 'undefined') return;
+        const itensOrdenados = [...containerCategorias.querySelectorAll('.dd-item-categoria')];
+        
+        for (let index = 0; index < itensOrdenados.length; index++) {
+            const idDoc = itensOrdenados[index].getAttribute('data-id');
+            try {
+                // Atualiza o campo 'ordem' direto no banco para persistir pós-F5
+                await updateDoc(doc(db, "categorias", idDoc), { ordem: index + 1 });
+            } catch (error) {
+                console.error("Erro ao reordenar: ", error);
+            }
+        }
+    }
+
+    // SUBMIT: Salvar Nova Categoria Mãe no Firestore
+    if (formCategoria) {
+        formCategoria.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nomeInput = document.getElementById('cat-nome');
+            const nome = nomeInput.value.trim();
+            if (!nome) return;
+
+            if (typeof db !== 'undefined') {
+                try {
+                    await addDoc(collection(db, "categorias"), {
+                        nome: nome,
+                        ordem: arrayCategoriasGlobal.length + 1,
+                        subcategorias: []
+                    });
+                    if (typeof showToast === 'function') showToast(`Categoria "${nome}" salva com sucesso!`);
+                    formCategoria.reset();
+                } catch (error) {
+                    console.error("Erro ao criar categoria: ", error);
+                }
+            }
+        });
+    }
+
+    // SUBMIT: Salvar Nova Subcategoria (Opcional) no Firestore
+    if (formSubcategoria) {
+        formSubcategoria.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const idPai = selectPai.value;
+            const nomeSubInput = document.getElementById('sub-cat-nome');
+            const nomeSub = nomeSubInput.value.trim();
+            if (!idPai || !nomeSub) return;
+
+            if (typeof db !== 'undefined') {
+                try {
+                    // Adiciona o elemento de texto sem duplicar no array interno do documento
+                    await updateDoc(doc(db, "categorias", idPai), {
+                        subcategorias: arrayUnion(nomeSub)
+                    });
+                    if (typeof showToast === 'function') showToast(`Subcategoria "${nomeSub}" adicionada!`);
+                    formSubcategoria.reset();
+                } catch (error) {
+                    console.error("Erro ao adicionar subcategoria: ", error);
+                }
+            }
+        });
+    }
+
+    // DELETAR: Remover Categoria Mãe do Firestore
+    window.deletarCategoriaMae = async function(id) {
+        if (confirm("Deseja mesmo remover esta categoria de forma definitiva?") && typeof db !== 'undefined') {
+            try {
+                await deleteDoc(doc(db, "categorias", id));
+                if (typeof showToast === 'function') showToast("Categoria removida do banco.");
+            } catch (error) {
+                console.error("Erro ao remover: ", error);
+            }
+        }
+    };
+
+    // ==========================================
+    // ☁️ PERSISTÊNCIA EM TEMPO REAL: VITRINE (FIREBASE)
+    // ==========================================
+    function ouvirProdutosDoFirestore() {
+        if (typeof db === 'undefined') return;
+
+        // Escuta a coleção "projetos" ativa (conforme suas regras estabelecidas)
+        onSnapshot(collection(db, "projetos"), (snapshot) => {
+            const produtosDoBanco = [];
+            snapshot.forEach((doc) => {
+                produtosDoBanco.push({ id: doc.id, ...doc.data() });
+            });
+            renderizarProdutosVitrine(produtosDoBanco);
+        });
+    }
+
+    function renderizarProdutosVitrine(listaProdutos) {
+        const containerProdutos = document.getElementById('container-admin-produtos');
+        if(!containerProdutos) return;
+
+        containerProdutos.innerHTML = '';
+
+        if(listaProdutos.length === 0) {
+            containerProdutos.innerHTML = `<p style="font-size:13px; color:var(--text-muted); font-style:italic; padding:20px;">Nenhum produto cadastrado na vitrine.</p>`;
+            return;
+        }
+
+        listaProdutos.forEach(prod => {
+            const card = document.createElement('div');
+            card.className = 'product-admin-card';
+            
+            let renderEstoqueDinamico = '';
+            // Regra de Negócio: Preço ocultado completamente em Modo Projetos
+            let renderPrecoDinamico = modoAtivo === 'colabs' ? `<span style="font-weight:bold; color:var(--color-primary); font-size:15px;">R$ ${Number(prod.preco || 0).toFixed(2)}</span>` : '';
+            let badgeSubcategoria = prod.subcategoria ? `<span style="font-size:10px; background:#edf2f7; padding:2px 6px; border-radius:4px; color:var(--text-muted); font-weight:normal;"><i class="fa-solid fa-tag"></i> ${prod.subcategoria}</span>` : '';
+
+            if (modoAtivo === 'colabs') {
+                renderEstoqueDinamico = `
+                    <p style="font-size:12px; margin-top:5px;"><strong>Resp/Arq:</strong> ${prod.arquiteto || 'Geral'}</p>
+                    <div style="margin-top:8px; display:flex; justify-content:space-between; align-items:center;">
+                        <span class="badge ${prod.estoque > 0 ? 'badge-success' : 'badge-danger'}">Estoque: ${prod.estoque || 0} un</span>
+                    </div>
+                `;
+            } else {
+                if (prod.exclusivo) {
+                    renderEstoqueDinamico = `
+                        <div style="margin-top:8px; display:flex; justify-content:space-between; align-items:center;">
+                            <span class="badge badge-prod">Coleção Exclusiva</span>
+                            <strong style="font-size:13px; color:var(--color-primary);">${prod.qtdAtual || 0}/${prod.qtdTotal || 0} Itens</strong>
+                        </div>
+                        <div style="display:flex; gap:5px; margin-top:8px;">
+                            <button type="button" class="btn-primary" style="padding:3px 8px; font-size:11px;" onclick="ajustarFracao('${prod.id}', -1, ${prod.qtdAtual || 0})">- 1 un</button>
+                            <button type="button" class="btn-primary" style="padding:3px 8px; font-size:11px; background:#4a5568;" onclick="ajustarFracao('${prod.id}', 1, ${prod.qtdAtual || 0})">+ 1 un</button>
+                        </div>
+                    `;
+                } else {
+                    renderEstoqueDinamico = `<span class="badge badge-success" style="margin-top:8px; display:inline-block;">Produto Comum</span>`;
+                }
+            }
+
+            card.innerHTML = `
+                <div class="product-card-img" style="background-image: url('${(prod.fotos && prod.fotos[0]) || 'https://placehold.co/400x300?text=Sem+Foto'}')"></div>
+                <div class="product-card-body">
+                    <h4 style="margin:0 0 5px 0; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                        <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${prod.nome}</span>
+                        ${badgeSubcategoria}
+                    </h4>
+                    ${renderPrecoDinamico}
+                    <p style="font-size:11px; color:var(--text-muted); margin-top:5px; flex-grow:1;">${prod.desc || ''}</p>
+                    ${renderEstoqueDinamico}
+                    <div style="margin-top:12px; padding-top:10px; border-top:1px solid var(--color-border); display:flex; gap:10px;">
+                        <button type="button" class="btn-primary" style="flex:1; padding:6px; background:var(--color-soft-bg); color:var(--text-main);" onclick="carregarProdutoParaEdicao('${prod.id}')"><i class="fa-solid fa-pen-to-square"></i></button>
+                        <button type="button" class="btn-primary" style="flex:1; padding:6px; background:#fee2e2; color:var(--color-danger);" onclick="removerProdutoDaVitrine('${prod.id}')"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                </div>
+            `;
+            containerProdutos.appendChild(card);
+        });
+    }
+
+    // ==========================================
+    // PAINÉIS LATERAIS (Membros Integrados)
+    // ==========================================
+    window.renderizarPainelNaDiv = function(idDoContainer, targetContext) {
+        const painel = document.getElementById(idDoContainer);
+        if(!painel) return; 
+
+        painel.innerHTML = `
+            <h4 style="margin-top:0; color:#6f42c1; font-size:14px; border-bottom:2px solid var(--color-border); padding-bottom:8px; margin-bottom:12px;">
+                <i class="fa-solid fa-users"></i> Membros da Equipe
+            </h4>
+            <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">Clique no membro para indexar ao formulário:</p>
+            <div class="membros-lista-box" style="display:flex; flex-direction:column; gap:8px; max-height:260px; overflow-y:auto; padding-right:4px;"></div>
+        `;
+        
+        const containerBox = painel.querySelector('.membros-lista-box');
+        if(!containerBox) return;
+
+        const membrosAtivos = listaMembrosCache.filter(membro => membro.what === true);
+
+        if (membrosAtivos.length === 0) {
+            containerBox.innerHTML = `<p style="font-size:12px; color:var(--text-muted); font-style:italic;">Nenhum administrador liberado.</p>`;
+            return;
+        }
+
+        membrosAtivos.forEach(membro => {
+            const item = document.createElement('div');
+            item.className = "membro-item-clicavel";
+            item.style = "padding:10px; border:1px solid var(--color-border); border-radius:6px; cursor:pointer; background:var(--color-soft-bg); font-size:12px; transition: all 0.2s;";
+            item.innerHTML = `<strong>${membro.nome || 'Usuário Anônimo'}</strong><br><span style="font-size:10px; color:var(--text-muted);">${membro.email}</span>`;
+            
+            item.addEventListener('click', () => {
+                if(targetContext === 'pedidos') {
+                    const inputRespPedido = document.getElementById('ped-responsavel');
+                    if(inputRespPedido) {
+                        inputRespPedido.value = `${membro.nome} (${membro.email})`;
+                        if (typeof showToast === 'function') showToast(`Responsável definido: ${membro.nome}`);
+                    }
+                } else if(targetContext === 'vitrine' && modoAtivo === 'colabs') {
+                    const inputArqVitrine = document.getElementById('proj-arquiteto');
+                    if(inputArqVitrine) {
+                        inputArqVitrine.value = membro.nome;
+                        if (typeof showToast === 'function') showToast(`Arquiteto definido: ${membro.nome}`);
+                    }
+                }
+            });
+            
+            containerBox.appendChild(item);
+        });
+    }
+
+});
+
+// ==========================================
+// OPERAÇÕES GLOBAIS DE JANELA (FIREBASE)
+// ==========================================
+window.ajustarFracao = async function(idProduto, variacao, valorAtual) {
+    if (typeof db === 'undefined') return;
+    
+    let novoValor = valorAtual + variacao;
+    if (novoValor < 0) novoValor = 0; // Proteção para estoque não ser negativo
+
+    try {
+        // Atualiza a quantidade direto no documento do item exclusivo
+        await updateDoc(doc(db, "projetos", idProduto), {
+            qtdAtual: novoValor
+        });
+        if (typeof showToast === 'function') {
+            showToast(`Estoque atualizado para ${novoValor} unidade(s).`);
+        }
+    } catch (error) {
+        console.error("Erro ao alterar estoque fracionado: ", error);
+    }
+}
+
+window.removerProdutoDaVitrine = async function(idProduto) {
+    if (confirm("Deseja apagar este produto da vitrine definitivamente?") && typeof db !== 'undefined') {
+        try {
+            await deleteDoc(doc(db, "projetos", idProduto));
+            if (typeof showToast === 'function') showToast("Produto removido com sucesso!");
+        } catch (error) {
+            console.error("Erro ao remover produto: ", error);
+        }
+    }
+}
